@@ -89,9 +89,23 @@ class Cards(Base):
     id: Mapped[int] = mapped_column(primary_key=True, unique=True, nullable=False)
     name: Mapped[str] = mapped_column(nullable=False)
     about: Mapped[str] = mapped_column(nullable=True)
+    own_login: Mapped[str] = mapped_column(ForeignKey(Users.login, onupdate="CASCAD",ondelet="CASCAD"),nullable=False)
     code: Mapped[int] = mapped_column(nullable=False)
     code_type: Mapped[str] = mapped_column(nullable=False)
     card_image:Mapped[BLOB] = mapped_column(nullable=True)
+    date_create: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), default=datetime.now()
+    )
+    date_update: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now(), nullable=True
+    )
+
+class Cards(Base):
+    __tablename__ = "cards_access"
+
+    id: Mapped[int] = mapped_column(primary_key=True, unique=True, nullable=False)
+    user_login: Mapped[str] = mapped_column(ForeignKey(Users.login, onupdate="CASCAD",ondelet="CASCAD"),nullable=False)
+    card_id: Mapped[int] = mapped_column(ForeignKey(Cards.i, onupdate="CASCAD",ondelet="CASCAD"),nullable=False)
     date_create: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), default=datetime.now()
     )

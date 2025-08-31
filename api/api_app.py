@@ -44,7 +44,7 @@ def init_app():
         app = FastAPI(
             title="StorCard",
             description="StorCard is your own server for storing discount cards",
-            version="0.3.0-alfa",
+            version="0.3.2-alfa",
         )
         return app
     except Exception as err:

@@ -1,6 +1,6 @@
 [project]
 name = "storcard"
-version = "0.3.0"
+version = "0.3.2"
 description = "Add your description here"
 authors = [
     {name = "foxer928",email = "nik280302@yandex.ru"}
