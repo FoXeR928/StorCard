@@ -1,5 +1,5 @@
 from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, Session
-from sqlalchemy import ForeignKey, create_engine, func, DateTime
+from sqlalchemy import ForeignKey, create_engine, func, DateTime,BLOB
 from datetime import datetime
 import secrets
 import bcrypt
@@ -81,3 +81,20 @@ class Configs(Base):
             return True
         else:
             return False
+        
+
+class Cards(Base):
+    __tablename__ = "cards"
+
+    id: Mapped[int] = mapped_column(primary_key=True, unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(nullable=False)
+    about: Mapped[str] = mapped_column(nullable=True)
+    code: Mapped[int] = mapped_column(nullable=False)
+    code_type: Mapped[str] = mapped_column(nullable=False)
+    card_image:Mapped[BLOB] = mapped_column(nullable=True)
+    date_create: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), default=datetime.now()
+    )
+    date_update: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now(), nullable=True
+    )
