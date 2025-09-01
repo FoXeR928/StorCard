@@ -3,28 +3,42 @@ from sqlalchemy import ForeignKey, create_engine, func, DateTime,BLOB
 from datetime import datetime
 import secrets
 import bcrypt
+import json
 from loguru import logger
 
-from instance.config_read import init_confg
-
-config = init_confg()
+def init_confg():
+    try:
+        with open("./instance/config.json","r") as file_config:
+            config = json.load(file_config)
+        logger.info("\u0418\u043d\u0438\u0446\u0438\u0430\u043b\u0438\u0437\u0438\u0440\u043e\u0432\u0430\u043d \u043a\u043e\u043d\u0444\u0438\u0433 \u0431\u0430\u0437\u044b \u0434\u0430\u043d\u043d\u044b\u0445")
+        return config
+    except Exception as err:
+        logger.critical(f"\u041e\u0448\u0438\u0431\u043a\u0430 \u0438\u043d\u0438\u0446\u0438\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u0438 \u043a\u043e\u043d\u0444\u0438\u0433\u043e\u0432 \u0431\u0430\u0437\u044b \u0434\u0430\u043d\u043d\u044b\u0445: {err}")
+        exit()
 
 
 def init_db():
     try:
-        engine = create_engine(config["SQLALCHEMY_DATABASE_URI"])
+        config=init_confg()
+        if config["sql_driver"]=="sqlite":
+            sql_url=f"{config["sql_driver"]}:///{config["db_path"]}/{config["sql_db"]}.db"
+        elif config["sql_driver"]=="mysql":
+            sql_url=f"{config["sql_driver"]}://{config["sql_user"]}:{config["sql_password"]}@{config["sql_host"]}:{config["sql_port"]}/{config["sql_db"]}"
+        elif config["sql_driver"]=="postgresql":
+            sql_url=f"{config["sql_driver"]}://{config["sql_user"]}:{config["sql_password"]}@{config["sql_host"]}:{config["sql_port"]}/{config["sql_db"]}"
+        else:
+            raise None
+        engine = create_engine(url=sql_url)
         Base.metadata.create_all(engine)
-        logger.info("\u0411\u0430\u0437\u0430 \u0434\u0430\u043d\u043d\u044b\u0445 \u0438\u043d\u0438\u0446\u0438\u0430\u043b\u0438\u0437\u0438\u0440\u043e\u0432\u0430\u043d\u0430")
+        logger.info("База данных инициализирована")
         return engine
     except Exception as err:
-        logger.critical(f"\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0438\u043d\u0438\u0446\u0438\u0430\u043b\u0438\u0437\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0431\u0430\u0437\u0443 \u0434\u0430\u043d\u043d\u044b\u0445 \u041e\u0448\u0438\u0431\u043a\u0430: {err}")
+        logger.critical(f"Не удалось инициализировать базу данных Ошибка: {err}")
         exit()
 
 
 def session_create():
-    from api.api_app import engine
-
-    session = Session(bind=engine)
+    session = Session(bind=init_db())
     return session
 
 
@@ -89,10 +103,10 @@ class Cards(Base):
     id: Mapped[int] = mapped_column(primary_key=True, unique=True, nullable=False)
     name: Mapped[str] = mapped_column(nullable=False)
     about: Mapped[str] = mapped_column(nullable=True)
-    own_login: Mapped[str] = mapped_column(ForeignKey(Users.login, onupdate="CASCAD",ondelet="CASCAD"),nullable=False)
+    own_login: Mapped[str] = mapped_column(ForeignKey(Users.login, onupdate="CASCADE",ondelete="CASCADE"),nullable=False)
     code: Mapped[int] = mapped_column(nullable=False)
     code_type: Mapped[str] = mapped_column(nullable=False)
-    card_image:Mapped[BLOB] = mapped_column(nullable=True)
+    card_image:Mapped[str] = mapped_column(BLOB,nullable=True)
     date_create: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), default=datetime.now()
     )
@@ -104,8 +118,8 @@ class Cards(Base):
     __tablename__ = "cards_access"
 
     id: Mapped[int] = mapped_column(primary_key=True, unique=True, nullable=False)
-    user_login: Mapped[str] = mapped_column(ForeignKey(Users.login, onupdate="CASCAD",ondelet="CASCAD"),nullable=False)
-    card_id: Mapped[int] = mapped_column(ForeignKey(Cards.i, onupdate="CASCAD",ondelet="CASCAD"),nullable=False)
+    user_login: Mapped[str] = mapped_column(ForeignKey(Users.login, onupdate="CASCADE",ondelete="CASCADE"),nullable=False)
+    card_id: Mapped[int] = mapped_column(ForeignKey(Cards.id, onupdate="CASCADE",ondelete="CASCADE"),nullable=False)
     date_create: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), default=datetime.now()
     )
