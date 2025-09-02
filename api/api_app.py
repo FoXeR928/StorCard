@@ -6,6 +6,7 @@ from loguru import logger
 
 def init_pages():
     try:
+        app.mount("/static", StaticFiles(directory="front/public/static"), name="front")
         if os.path.exists("./instance/config.json")==True:
             from api.api_auth import auth_app
             from api.api_config import config_app
@@ -14,12 +15,10 @@ def init_pages():
             app.include_router(router=auth_app)
             app.include_router(router=config_app)
             app.include_router(router=users_app)
-            app.mount("/static", StaticFiles(directory="front/public/static"), name="front")
         else:
             from api.api_config_start import config_start_app
             from front.start_pages import start_pages_app
 
-            app.mount("/static", StaticFiles(directory="front/public/static"), name="front")
             app.include_router(router=config_start_app)
             app.include_router(router=start_pages_app)
         logger.debug("Инициализирован API")
