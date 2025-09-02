@@ -2,7 +2,7 @@ from fastapi import APIRouter,Response
 from pydantic import BaseModel
 from loguru import logger
 
-from db_modules.db_query_config import (
+from db_modules.db_query_config_start import (
     create_config_app_start_query
 )
 

@@ -3,17 +3,10 @@ from fastapi.staticfiles import StaticFiles
 import os
 from loguru import logger
 
-from db_modules.db_create_default import (
-    create_default_users,
-    create_default_config,
-)
-from db_modules.db_query_config import get_config
-
 
 def init_pages():
     try:
         if os.path.exists("./instance/config.json")==True:
-
             from api.api_auth import auth_app
             from api.api_config import config_app
             from api.api_users import users_app
@@ -21,8 +14,7 @@ def init_pages():
             app.include_router(router=auth_app)
             app.include_router(router=config_app)
             app.include_router(router=users_app)
-            if get_config(name="front_enable")==True:
-                app.mount("/static", StaticFiles(directory="front/public/static"), name="front")
+            app.mount("/static", StaticFiles(directory="front/public/static"), name="front")
         else:
             from api.api_config_start import config_start_app
             from front.start_pages import start_pages_app
@@ -38,6 +30,10 @@ def init_pages():
 
 
 if os.path.exists("./instance/config.json")==True:
+    from db_modules.db_create_default import (
+        create_default_users,
+        create_default_config,
+    )
     create_default_config()
     create_default_users()
 try:

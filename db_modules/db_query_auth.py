@@ -35,7 +35,7 @@ def decode_token(token: str):
 
 def get_current_user_query(login: str):
     if check_user(login=login) == True:
-        session = session_create()
+        session = session_create
         try:
             user = session.execute(
                 select(Users.login, Users.user_name, Users.is_admin).where(
@@ -69,7 +69,7 @@ def auth_query(login: str, password: str):
         "cod": 500,
     }
     if check_user(login=login) == True:
-        session = session_create()
+        session = session_create
         try:
             auth = session.scalars(select(Users).where(Users.login == login)).one()
             check_auth = auth.check_password(password=password)
@@ -101,7 +101,7 @@ def auth_query(login: str, password: str):
 
 
 def logout_query(login: str):
-    session = session_create()
+    session = session_create
     try:
         session.execute(update(Users).where(Users.login == login).values(token=None))
         session.commit()

@@ -30,17 +30,12 @@ def init_db():
             raise None
         engine = create_engine(url=sql_url)
         Base.metadata.create_all(engine)
+        session = Session(bind=init_db())
         logger.info("База данных инициализирована")
-        return engine
+        return session
     except Exception as err:
         logger.critical(f"Не удалось инициализировать базу данных Ошибка: {err}")
         exit()
-
-
-def session_create():
-    session = Session(bind=init_db())
-    return session
-
 
 class Base(DeclarativeBase):
     pass
@@ -114,7 +109,7 @@ class Cards(Base):
         DateTime(timezone=True), onupdate=func.now(), nullable=True
     )
 
-class Cards(Base):
+class CardsAccess(Base):
     __tablename__ = "cards_access"
 
     id: Mapped[int] = mapped_column(primary_key=True, unique=True, nullable=False)
@@ -126,3 +121,5 @@ class Cards(Base):
     date_update: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), onupdate=func.now(), nullable=True
     )
+
+session_create=init_db()

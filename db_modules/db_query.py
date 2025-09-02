@@ -5,7 +5,7 @@ from db_modules.db_create import Users, session_create,Configs
 
 
 def check_user(login: str):
-    session = session_create()
+    session = session_create
     try:
         user = session.scalars(select(Users).where(Users.login == login)).one_or_none()
         logger.trace(f"Проверка пользователя {login} в базе")

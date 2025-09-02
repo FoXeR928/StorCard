@@ -1,0 +1,45 @@
+{% extends "sample_back.html" %}
+
+{% block title %}Настройки{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="/static/style/style_settings.css">
+{% endblock %}
+
+{% block content %}
+<form class="form_with_back" method="post">
+    <label for="app_port">Порт приложения</label>
+    <input required id="app_port" class="port -input" type="number" value="7000">
+    <div class="check_box">
+        <label for="front_enable">Включить веб-интерфейс</label>
+        <input id="front_enable" class="front_enable -input" type="checkbox" checked>
+    </div>
+    <select id="sql_driver">
+        <option value="" selected disabled hidden>Выберите драйвер SQL</option>
+        <option value="sqlite">SQLite</option>
+        <option value="mysql">MySQL</option>
+        <option value="postgresql">PostgreSQL</option>
+    </select>
+    <label for="sql_host" class="sql_host -hide -server">Хост SQL</label>
+    <input id="sql_host" class="sql_host -input -hide -server" type="text">
+    <label for="sql_port" class="sql_port -hide -server">Порт SQL</label>
+    <input id="sql_port" class="sql_port -input -hide -server" type="number">
+    <label for="sql_db" class="sql_db -hide -server -local">Имя базы данных SQL</label>
+    <input required id="sql_db" class="sql_db -input -hide -server -local" type="text" value="ragi_db">
+    <label for="sql_user" class="sql_user -hide -server">Пользователь SQL</label>
+    <input id="sql_user"class="sql_user -input -hide -server" type="text">
+    <label for="sql_password" class="sql_password -hide -server">Пароль SQL</label>
+    <div class="hide-block -input -hide -server">
+        <div class="password-block">
+            <input id="sql_password" class="sql_password -password" type="password">
+            <div id="password-show" class="password-control"></div>
+        </div>
+    </div>
+    <label for="db_path" class="db_path -hide -local">Путь базы данных</label>
+    <input id="db_path" class="db_path -input -hide -local" type="text" value="./instance">
+    <button id="send_settings" class="button_send -button">Сохранить</button>
+</form>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/start_config/setting_db.js"></script>
+{% endblock %}
