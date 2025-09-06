@@ -11,10 +11,14 @@ def init_pages():
             from api.api_auth import auth_app
             from api.api_config import config_app
             from api.api_users import users_app
+            from api.api_cards import cards_app
+            from front.admin_pages import admin_pages_app
 
             app.include_router(router=auth_app)
             app.include_router(router=config_app)
             app.include_router(router=users_app)
+            app.include_router(router=cards_app)
+            app.include_router(router=admin_pages_app)
         else:
             from api.api_config_start import config_start_app
             from front.start_pages import start_pages_app

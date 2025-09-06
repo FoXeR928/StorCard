@@ -1,4 +1,4 @@
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete,func
 from loguru import logger
 import secrets
 
@@ -22,15 +22,15 @@ def create_default_users(
         except Exception as err:
             logger.error(f"Не удалось удалить строки таблицы Users Ошибка {err}")
     try:
-        check_admin = session.scalars(
-            select(base).where(base.login == admin_login)
-        ).first()
+        check_admin = session.scalar(
+            select(func.count(base.login)).where(base.is_admin == True)
+        )
         logger.trace("Проверенно существование записей в базе Users")
     except Exception as err:
         logger.error(
             f"Не удалось проверить существование записей таблицы Users Ошибка {err}"
         )
-    if check_admin == None:
+    if check_admin == 0:
         try:
             admin = base(login=admin_login, user_name=admin_name, is_admin=is_admin)
             admin.set_password(admin_password)

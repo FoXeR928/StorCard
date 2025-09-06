@@ -30,7 +30,7 @@ def init_db():
             raise None
         engine = create_engine(url=sql_url)
         Base.metadata.create_all(engine)
-        session = Session(bind=init_db())
+        session = Session(bind=engine)
         logger.info("База данных инициализирована")
         return session
     except Exception as err:
