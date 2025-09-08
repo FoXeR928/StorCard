@@ -9,3 +9,9 @@ try:
     logger.debug("Инициализирован веб-интерфейс администрирования")
 except Exception as err:
     logger.error(f"Не удалось инициализировать веб-интерфейс администрирования: {err}")
+
+@admin_pages_app.get("/", summary="Администрирование")
+async def admin_page(request: Request):
+    return templates.TemplateResponse(
+        name="admin/admin.html", context={"request": request}
+    )

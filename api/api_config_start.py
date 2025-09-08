@@ -1,5 +1,6 @@
 from fastapi import APIRouter,Response
 from pydantic import BaseModel
+from typing import Optional
 from loguru import logger
 
 from db_modules.db_query_config_start import (
@@ -16,12 +17,12 @@ except Exception as err:
 class ConfigStartApp(BaseModel):
     app_port:int=7000
     sql_driver:str="sqlite"
-    sql_host:str=None
-    sql_port:int=None
-    sql_db:str='storcard_db'
-    sql_user:str=None
-    sql_password:str=None
-    db_path:str='./instance'
+    sql_host:Optional[str]=None
+    sql_port:Optional[int]=None
+    sql_db:Optional[str]='storcard_db'
+    sql_user:Optional[str]=None
+    sql_password:Optional[str]=None
+    db_path:Optional[str]='./instance'
 
 @config_start_app.post("/create", summary="Создание установочных конфигов приложения")
 async def start_configs_app_api(

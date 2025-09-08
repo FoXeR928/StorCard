@@ -1,5 +1,5 @@
-$('#sql_driver').on('change',function(){
-    select=$(this).val()
+function select_driver(){
+    select=$("#sql_driver").val()
     if (select=='sqlite'){
         $('.-hide').hide()
         $('.-local').show()
@@ -14,9 +14,8 @@ $('#sql_driver').on('change',function(){
         $('#sql_port').val(3306)
         $('.-server').show()
     }
-})
-$("#send_settings").click(function(event){
-    event.preventDefault();
+}
+function start_config_create(){
     var app_port=$('#app_port').val()
     var sql_db=$('#sql_db').val()
     var sql_driver=$('#sql_driver').val()
@@ -62,4 +61,4 @@ $("#send_settings").click(function(event){
     }else{
         create_flash(flash_status="warning",message="Не все поля заполнены")
     }
-})
+}

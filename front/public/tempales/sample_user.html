@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style/style.css">
+    {% block styles %}{% endblock %}
+    <script src="/static/js/default/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="header" id="header">
+            <div class="nav_block">
+                <section class="nav_section">
+                    <article class="nav_article">
+                        <div class="nav_element -separete_block">
+                            <a class="nav_link -separete_main" href="/chats">Чаты</a>
+                            <button onclick="open_nav_hide()" class="button_nav_open -separete_second">^</button>    
+                        </div>
+                        <div class="nav_hide_block">
+                            <div class="nav_interior_block" id="chats_nav">
+                            </div>
+                        </div>
+                        
+                    </article>
+                    <a class="nav_link -button" href="/admin">Администрирование</a>    
+                    {% block admin %}{% endblock %}
+                </section>
+                <a class="nav_link -button" href="/auth/logout">Выйти</a>
+            </div>
+            <button onclick="open_nav()" class="button_nav -button_image" id="button_nav"><img src="/static/image/menu.svg" alt="Кнопка открытия меню"></button>
+        </nav>
+    </header>
+    <main class="main_with_nav" id="main">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+{% block scripts %}{% endblock %}
+<script src="/static/js/default/functions.js"></script>
+</html>
