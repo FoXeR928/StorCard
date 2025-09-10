@@ -43,7 +43,7 @@ try:
     app = FastAPI(
         title="StorCard",
         description="StorCard is your own server for storing discount cards",
-        version="0.3.3-alfa",
+        version="0.4.0-alfa",
     )
 except Exception as err:
     logger.critical(f"Ошибка инициализации приложения: {err}")
