@@ -87,7 +87,7 @@ def all_cards_query():
 def user_cards_query(user:User):
     try:
         session=session_create
-        cards_get=session.execute(select(Cards.id,Cards.name,Cards.about,Cards.own_login,Cards.image).join(CardsAccess).where(CardsAccess.user_login==user.login)).all()
+        cards_get=session.execute(select(Cards.id,Cards.name,Cards.about,Cards.own_login).join(CardsAccess).where(CardsAccess.user_login==user.login)).all()
         cards = [row._mapping for row in cards_get]
         result = {
             "result": True,

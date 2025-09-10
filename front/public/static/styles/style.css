@@ -1,0 +1,30 @@
+:root{
+    --bg-body: #f2f7ff;
+}
+body{
+    background-color: var(--bg-body);
+}
+.-admin{
+    display: grid;
+    grid-template-columns:2fr 1fr;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+}
+.-block{
+    background: white;
+    border-radius: .7em;
+    padding: 1em;
+}
+.configs{
+    grid-column-start: 2;
+    grid-row-start: 1;
+    grid-row-end: 3;
+}
+.main_nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.block-name{
+    margin: 0;
+}
