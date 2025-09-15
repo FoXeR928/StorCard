@@ -4,7 +4,7 @@ from typing import Optional,List
 from loguru import logger
 
 from api.api_auth import User, get_current_user
-from db_modules.db_query_cards import all_cards_query,user_cards_query,get_card_query,add_card_query,update_card_name_query,update_card_about_query,update_card_code_query,update_card_image_query,delete_card_query
+from db_modules.db_query_cards import all_cards_query,user_cards_query,get_card_query,add_card_query,update_card_name_query,update_card_about_query,update_card_code_query,update_card_image_query,delete_card_query, update_card_own_query,add_card_access_query
 
 try:
     cards_app = APIRouter(prefix="/cards", tags=["Карты"])
@@ -30,6 +30,12 @@ class UpdateCardAbout(Card):
 class UpdateCardCode(Card):
     code:str
     code_type:str
+
+class UpdateCardOwn(Card):
+    own:str
+
+class AddCardAccess(Card):
+    login:str
 
 
 @cards_app.get("/get", summary="Получение всех карт в базе")
@@ -71,7 +77,16 @@ async def get_card_api(
 async def add_card_api(
     response: Response, add:AddCard, current_user: User = Depends(get_current_user)
 ):
-    result = add_card_query(name=add.name,about=add.about,own_login=current_user.login,code=add.code,code_type=add.code_type)
+    result = add_card_query(name=add.name,about=add.about,user=current_user,code=add.code,code_type=add.code_type)
+    response.status_code = result["cod"]
+    del result["cod"]
+    return result
+
+@cards_app.post("/add/access", summary="Добавление доступа к карте")
+async def add_card_access_api(
+    response: Response, access:AddCardAccess, current_user: User = Depends(get_current_user)
+):
+    result = add_card_access_query(card_id=access.id,login=access.login,user=current_user)
     response.status_code = result["cod"]
     del result["cod"]
     return result
@@ -99,6 +114,15 @@ async def update_card_code_api(
     response: Response, code:UpdateCardCode, current_user: User = Depends(get_current_user)
 ):
     result = update_card_code_query(card_id=code.id,user=current_user,code=code.code,code_type=code.code_type)
+    response.status_code = result["cod"]
+    del result["cod"]
+    return result
+
+@cards_app.patch("/update/own", summary="Обновление владельца карты")
+async def update_card_code_api(
+    response: Response, own:UpdateCardOwn, current_user: User = Depends(get_current_user)
+):
+    result = update_card_own_query(card_id=own.id,user=current_user,own=own.own)
     response.status_code = result["cod"]
     del result["cod"]
     return result

@@ -150,22 +150,14 @@ def get_card_query(card_id:int,user:User):
         }
     return result
 
-def add_card_query(name:str,about:str,own_login:str,code:str,code_type:str):
+def add_card_query(name:str,about:str,user:User,code:str,code_type:str):
     try:
         session=session_create
-        card_add=Cards(name=name,about=about,own_login=own_login,code=code,code_type=code_type)
+        card_add=Cards(name=name,about=about,own_login=user.login,code=code,code_type=code_type)
         session.add(card_add)
         session.flush()
-        card_access=CardsAccess(user_login=own_login,card_id=card_add.id)
-        session.add(card_access)
-        session.commit()
-        result = {
-            "result": True,
-            "message": "Добавлена карта",
-            "category": "success",
-            "cod": 201,
-        }
-        logger.success(f"Добавлена карта {card_add.id} пользователя {own_login}")
+        result=add_card_access_query(card_id=card_add.id,login=user.login,user=user)
+        logger.success(f"Добавлена карта {card_add.id} пользователя {user.login}")
     except Exception as err:
         logger.error(f"Не удалось добавить карту Ошибка {err}")
         result = {
@@ -176,6 +168,48 @@ def add_card_query(name:str,about:str,own_login:str,code:str,code_type:str):
         }
     finally:
         session.close()
+    return result
+
+
+def add_card_access_query(card_id:int,login:str,user:User):
+    if check_card(card_id=card_id)==True:
+        if check_card_own(card_id=card_id,user=user)==True:
+            try:
+                session=session_create
+                card_access=CardsAccess(user_login=login,card_id=card_id)
+                session.add(card_access)
+                session.commit()
+                result = {
+                    "result": True,
+                    "message": "Добавлена карта",
+                    "category": "success",
+                    "cod": 201,
+                }
+                logger.success(f"Добавлена доступ на карту {card_id} пользователю {login}")
+            except Exception as err:
+                logger.error(f"Не удалось добавить доступ на карту Ошибка {err}")
+                result = {
+                    "result": False,
+                    "message": "Ошибка сервера не удалось добавить карту",
+                    "category": "error",
+                    "cod": 500,
+                }
+            finally:
+                session.close()
+        else:
+            result = {
+                "result": False,
+                "message": "Доступн запрещен",
+                "category": "warning",
+                "cod": 403,
+            }
+    else:
+        result = {
+            "result": False,
+            "message": "Карта не найдена",
+            "category": "warning",
+            "cod": 404,
+        }
     return result
 
 def update_card_name_query(card_id:int,user:User,name:str):
@@ -282,6 +316,56 @@ def update_card_code_query(card_id:int,user:User,code:str,code_type:str):
                 }
             finally:
                 session.close()
+        else:
+            result = {
+                "result": False,
+                "message": "Доступн запрещен",
+                "category": "warning",
+                "cod": 403,
+            }
+    else:
+        result = {
+            "result": False,
+            "message": "Карта не найдена",
+            "category": "warning",
+            "cod": 404,
+        }
+    return result
+
+def update_card_own_query(card_id:int,user:User,own:str):
+    if check_card(card_id=card_id)==True:
+        if check_card_own(card_id=card_id,user=user)==True:
+            if check_user(login=own)==True:
+                try:
+                    session=session_create
+                    session.execute(update(Cards).where(Cards.id==card_id).values(own_login=own))
+                    session.commit()
+                    if check_card_access(card_id=card_id,user=user)==False:
+                        add_card_access_query(card_id=card_id,login=user.login,user=user)
+                    logger.success(f"Владелец карты {card_id} обновлен на {own} успешно")
+                    result = {
+                        "result": True,
+                        "message": "Владелец карты обновлен",
+                        "category": "success",
+                        "cod": 201,
+                    }
+                except Exception as err:
+                    logger.error(f"Не удалось получить карту из базы Ошибка {err}")
+                    result = {
+                        "result": False,
+                        "message": "Ошибка сервера не удалось получить информацию о карте",
+                        "category": "error",
+                        "cod": 500,
+                    }
+                finally:
+                    session.close()
+            else:
+                result = {
+                "result": False,
+                "message": "Пользоватеь не найден",
+                "category": "warning",
+                "cod": 404,
+            }
         else:
             result = {
                 "result": False,

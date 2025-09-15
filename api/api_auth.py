@@ -27,8 +27,11 @@ class Auth(User):
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     login = decode_token(token=token)
-    user = get_current_user_query(login=login)
-    return User(login=user[0], name=user[1], is_admin=bool(int(user[2])))
+    if login==None:
+        pass
+    else:
+        user = get_current_user_query(login=login)
+        return User(login=user[0], name=user[1], is_admin=bool(int(user[2])))
 
 
 @auth_app.post(

@@ -50,13 +50,11 @@ def create_default_config(
     recreate: bool = False,
     app_port:int=7000,
     token: str = secrets.token_hex(64),
-    site_name: str = "StorCard",
     debug:bool=False,
 ):
     configs_list = (
         ("app_port", "Порт приложения", app_port, "number"),
         ("skey", "Ключ для генерации OAuth2 токена", token, "text"),
-        ("site_name", "Имя приложения", site_name, "text"),
         ("debug", "Подробное логирование", debug, "boolen"),
     )
     session = session_create
