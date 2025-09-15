@@ -12,7 +12,7 @@ from db_modules.db_query_auth import (
 
 auth_app = APIRouter(
     prefix="/auth",
-    tags=["\u0410\u0432\u0442\u043e\u0440\u0438\u0437\u0430\u0446\u0438\u044f"],
+    tags=["Авторизация"],
 )
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 

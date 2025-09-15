@@ -64,7 +64,7 @@ function get_configs(){
                     }else{
                         input_element="<input type="+config.input_format+" class='input_value  -separete_main -input_separete' id='"+config.name+"' value="+config.value+"></input>"
                     }
-                    $("#table_block").append('<tr class="table_body_element_block"><td class="table_element -table_body_element search_element_configs">'+config.name+'</td><td class="table_element -table_body_element">'+config.about+'</td><td class="table_element -table_body_element -separete_block">'+input_element+'<button class="button_save -separete_second -button_separete" onclick="'+command+'">\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c</button></td></tr>')
+                    $("#table_block").append('<tr class="table_body_element_block"><td class="table_element -table_body_element search_element_configs">'+config.name+'</td><td class="table_element -table_body_element -hide-th">'+config.about+'</td><td class="table_element -table_body_element -separete_block">'+input_element+'<button class="button_save -separete_second -button_separete" onclick="'+command+'"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Send SVG Icon</title><path fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.912 12H4L2.023 4.135A.662.662 0 0 1 2 3.995c-.022-.721.772-1.221 1.46-.891L22 12L3.46 20.896c-.68.327-1.464-.159-1.46-.867a.66.66 0 0 1 .033-.186L3.5 15"/></svg></button></td></tr>')
                 })
             }
         },

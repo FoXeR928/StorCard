@@ -84,10 +84,7 @@
     <section id="cards" class="cards -block">
         <article class="main_nav">
             <h3 class="block-name">Администрирование карт</h3>
-            <div class="search_form -separete_block">
-                <input oninput="search_on_page('_cards')" id="search_cards" type="text" class="search_input -separete_main -input_separete" placeholder="Поиск карт">
-                <input onclick="search_on_page('_cards')" id="search_cards" type="button" class="search_button -separete_second -button_separete" value="Поиск">
-            </div>
+            <input oninput="search_on_page('_cards')" id="search_cards" type="text" class="search_input -separete_main -input_separete" placeholder="Поиск карт">
         </article>
         <table class="table">
             <thead>
@@ -101,33 +98,10 @@
             </tbody>
         </table>
     </section>
-    <section id="configs" class="configs -block">
-        <article class="main_nav">
-            <h3 class="block-name">Конфигурации</h3>
-            <div class="search_form -separete_block">
-                <input oninput="search_on_page('_configs')" id="search_configs" type="text" class="search_input -separete_main -input_separete" placeholder="Поиск конфигов">
-                <input onclick="search_on_page('_configs')" type="button" class="search_button -separete_second -button_separete" value="Поиск">
-            </div>
-        </article>
-        <table class="table">
-            <thead>
-                <tr class="table_header">
-                    <th class="table_element -table_header_first">Конфиг</th>
-                    <th class="table_element">Описание</th>
-                    <th class="table_element -table_header_end -table-input">Значение</th>
-                </tr>
-            </thead>
-            <tbody id="table_block">
-            </tbody>
-        </table>
-    </section>
     <section id="users" class="users -block -midle-block">
         <article class="main_nav">
             <h3 class="block-name">Пользователи</h3>
-            <form class="search_form -separete_block">
-                <input type="text" oninput="search_on_page('_users')" id="search_users" class="search_input -separete_main -input_separete" placeholder="Поиск пользователей">
-                <input type="button" onclick="search_on_page('_users')" class="search_button -separete_second -button_separete" value="Поиск">
-            </form>
+            <input type="text" oninput="search_on_page('_users')" id="search_users" class="search_input -separete_main -input_separete" placeholder="Поиск пользователей">
             <button onclick="open_form()" class="button_add_user -button_image" id="add_button"><img src="/static/image/add.svg" alt="Добавить пользователя"></button>
         </article>
         <table class="table">
@@ -140,6 +114,23 @@
                 </tr>
             </thead>
             <tbody id="table_block_users">
+            </tbody>
+        </table>
+    </section>
+    <section id="configs" class="configs -block">
+        <article class="main_nav">
+            <h3 class="block-name">Конфигурации</h3>
+            <input oninput="search_on_page('_configs')" id="search_configs" type="text" class="search_input -separete_main -input_separete" placeholder="Поиск конфигов">
+        </article>
+        <table class="table">
+            <thead>
+                <tr class="table_header">
+                    <th class="table_element -table_header_first">Конфиг</th>
+                    <th class="table_element -hide-th">Описание</th>
+                    <th class="table_element -table_header_end -table-input">Значение</th>
+                </tr>
+            </thead>
+            <tbody id="table_block">
             </tbody>
         </table>
     </section>
