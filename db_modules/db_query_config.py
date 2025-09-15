@@ -3,10 +3,13 @@ from loguru import logger
 
 from db_modules.db_create import Configs, session_create
 
+
 def check_config(name: str):
     session = session_create
     try:
-        config = session.scalars(select(Configs).where(Configs.name == name)).one_or_none()
+        config = session.scalars(
+            select(Configs).where(Configs.name == name)
+        ).one_or_none()
         logger.trace(f"Проверка чата {name} в базе")
         if config != None:
             result = True
@@ -59,10 +62,12 @@ def get_configs_query():
 
 
 def update_config_query(name: str, value):
-    if check_config(name=name)==True:
+    if check_config(name=name) == True:
         session = session_create
         try:
-            session.execute(update(Configs).where(Configs.name == name).values(value=value))
+            session.execute(
+                update(Configs).where(Configs.name == name).values(value=value)
+            )
             session.commit()
             logger.success(f"Обноваление значения конфигова {name} на {value} из базы")
             result = {
@@ -89,6 +94,7 @@ def update_config_query(name: str, value):
             "cod": 404,
         }
     return result
+
 
 def get_config(name: str):
     session = session_create

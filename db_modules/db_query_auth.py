@@ -33,9 +33,9 @@ def decode_token(token: str):
         user = payload.get("sub")
     except Exception as err:
         logger.error(f"Ошибка сервера чтения токена: {err}")
-        user=None
+        user = None
     except jwt.ExpiredSignatureError as err:
-        user=None
+        user = None
     return user
 
 

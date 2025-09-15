@@ -28,7 +28,7 @@ class UpdatePassword(LoginUpdate):
 
 
 class UpdateRole(LoginUpdate):
-    is_admin: bool=False
+    is_admin: bool = False
 
 
 @users_app.get("/get", summary="Получение списка пользователей")

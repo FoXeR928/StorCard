@@ -1,4 +1,4 @@
-from sqlalchemy import select, delete,func
+from sqlalchemy import select, delete, func
 from loguru import logger
 import secrets
 
@@ -10,7 +10,7 @@ def create_default_users(
     admin_login: str = "admin",
     admin_password: str = "admin",
     admin_name: str = "админ",
-    is_admin:bool=True
+    is_admin: bool = True,
 ):
     session = session_create
     base = Users
@@ -48,9 +48,9 @@ def create_default_users(
 
 def create_default_config(
     recreate: bool = False,
-    app_port:int=7000,
+    app_port: int = 7000,
     token: str = secrets.token_hex(64),
-    debug:bool=False,
+    debug: bool = False,
 ):
     configs_list = (
         ("app_port", "Порт приложения", app_port, "number"),
@@ -72,7 +72,9 @@ def create_default_config(
             check_config = session.scalars(
                 select(base).where(base.name == configs[0])
             ).one_or_none()
-            logger.trace(f"Проверенно существование записи {configs[0]} в таблице Configs")
+            logger.trace(
+                f"Проверенно существование записи {configs[0]} в таблице Configs"
+            )
         except Exception as err:
             logger.error(
                 f"Не удалось проверить существование записи {configs[0]} в таблице Configs Ошибка {err}"

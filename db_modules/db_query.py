@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from loguru import logger
 
-from db_modules.db_create import Users, session_create,Configs
+from db_modules.db_create import Users, session_create, Configs
 
 
 def check_user(login: str):

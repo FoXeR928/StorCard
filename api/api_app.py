@@ -7,7 +7,7 @@ from loguru import logger
 def init_pages():
     try:
         app.mount("/static", StaticFiles(directory="front/public/static"), name="front")
-        if os.path.exists("./instance/config.json")==True:
+        if os.path.exists("./instance/config.json") == True:
             from api.api_auth import auth_app
             from api.api_config import config_app
             from api.api_users import users_app
@@ -30,20 +30,19 @@ def init_pages():
         logger.error(f"Ошибка инициализации API: {err}")
 
 
-
-
-if os.path.exists("./instance/config.json")==True:
+if os.path.exists("./instance/config.json") == True:
     from db_modules.db_create_default import (
         create_default_users,
         create_default_config,
     )
+
     create_default_config()
     create_default_users()
 try:
     app = FastAPI(
         title="StorCard",
         description="StorCard is your own server for storing discount cards",
-        version="0.4.0-alfa",
+        version="0.4.2-alfa",
     )
 except Exception as err:
     logger.critical(f"Ошибка инициализации приложения: {err}")

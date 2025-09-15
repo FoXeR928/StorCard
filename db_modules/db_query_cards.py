@@ -1,68 +1,78 @@
 from sqlalchemy import select, update, delete
 from loguru import logger
 
-from db_modules.db_create import Cards,CardsAccess, session_create
+from db_modules.db_create import Cards, CardsAccess, session_create
 from db_modules.db_query import check_user
 from api.api_auth import User
 
-def check_card_access(card_id:int,user:User):
-    if check_user(login=user.login)==True:
-        if user.is_admin==False:
+
+def check_card_access(card_id: int, user: User):
+    if check_user(login=user.login) == True:
+        if user.is_admin == False:
             try:
-                session=session_create
-                check_access=session.scalars(select(CardsAccess.user_login).where(CardsAccess.card_id==card_id)).one_or_none()
-                if check_access==user.login:
-                    result=True
+                session = session_create
+                check_access = session.scalars(
+                    select(CardsAccess.user_login).where(CardsAccess.card_id == card_id)
+                ).one_or_none()
+                if check_access == user.login:
+                    result = True
                 else:
-                    result=False
+                    result = False
             except Exception as err:
                 logger.error(f"Ошибка сервера при проверки доступа к картам: {err}")
-                result=False
+                result = False
             finally:
                 session.close()
         else:
-            result=True
+            result = True
     else:
-        result=False
+        result = False
     return result
 
-def check_card(card_id:int):
+
+def check_card(card_id: int):
     try:
-        session=session_create
-        check_card_get=session.scalars(select(Cards).where(Cards.id==card_id)).one_or_none()
-        if check_card_get==None:
-            result=False
+        session = session_create
+        check_card_get = session.scalars(
+            select(Cards).where(Cards.id == card_id)
+        ).one_or_none()
+        if check_card_get == None:
+            result = False
         else:
-            result=True
+            result = True
     except Exception as err:
         logger.error(f"Ошибка сервера при проверки карты: {err}")
-        result=False
+        result = False
     finally:
         session.close()
     return result
 
-def check_card_own(card_id:int,user:User):
-    if check_user(login=user.login)==True:
+
+def check_card_own(card_id: int, user: User):
+    if check_user(login=user.login) == True:
         try:
-            session=session_create
-            check_own=session.scalars(select(Cards.own_login).where(Cards.id==card_id)).one_or_none()
-            if check_own==user.login or user.is_admin==True:
-                result=True
+            session = session_create
+            check_own = session.scalars(
+                select(Cards.own_login).where(Cards.id == card_id)
+            ).one_or_none()
+            if check_own == user.login or user.is_admin == True:
+                result = True
             else:
-                result=False
+                result = False
         except Exception as err:
             logger.error(f"Ошибка сервера при проверки владельца карты: {err}")
-            result=False
+            result = False
         finally:
             session.close()
     else:
-        result=False
+        result = False
     return result
+
 
 def all_cards_query():
     try:
-        session=session_create
-        cards_get=session.execute(select(Cards.id,Cards.name,Cards.own_login)).all()
+        session = session_create
+        cards_get = session.execute(select(Cards.id, Cards.name, Cards.own_login)).all()
         cards = [row._mapping for row in cards_get]
         result = {
             "result": True,
@@ -84,10 +94,15 @@ def all_cards_query():
         session.close()
     return result
 
-def user_cards_query(user:User):
+
+def user_cards_query(user: User):
     try:
-        session=session_create
-        cards_get=session.execute(select(Cards.id,Cards.name,Cards.about,Cards.own_login).join(CardsAccess).where(CardsAccess.user_login==user.login)).all()
+        session = session_create
+        cards_get = session.execute(
+            select(Cards.id, Cards.name, Cards.about, Cards.own_login)
+            .join(CardsAccess)
+            .where(CardsAccess.user_login == user.login)
+        ).all()
         cards = [row._mapping for row in cards_get]
         result = {
             "result": True,
@@ -109,17 +124,22 @@ def user_cards_query(user:User):
         session.close()
     return result
 
-def get_card_query(card_id:int,user:User):
-    if check_card(card_id=card_id)==True:
-        if check_card_access(card_id=card_id,user=user)==True:
+
+def get_card_query(card_id: int, user: User):
+    if check_card(card_id=card_id) == True:
+        if check_card_access(card_id=card_id, user=user) == True:
             try:
-                session=session_create
-                card_get=session.execute(select(Cards.id,Cards.name,Cards.about,Cards.code,Cards.code_type)).one()
-                card=card_get._mapping
-                result={
+                session = session_create
+                card_get = session.execute(
+                    select(
+                        Cards.id, Cards.name, Cards.about, Cards.code, Cards.code_type
+                    )
+                ).one()
+                card = card_get._mapping
+                result = {
                     "result": True,
                     "message": "Карта получена",
-                    "card":card,
+                    "card": card,
                     "category": "success",
                     "cod": 200,
                 }
@@ -150,13 +170,16 @@ def get_card_query(card_id:int,user:User):
         }
     return result
 
-def add_card_query(name:str,about:str,user:User,code:str,code_type:str):
+
+def add_card_query(name: str, about: str, user: User, code: str, code_type: str):
     try:
-        session=session_create
-        card_add=Cards(name=name,about=about,own_login=user.login,code=code,code_type=code_type)
+        session = session_create
+        card_add = Cards(
+            name=name, about=about, own_login=user.login, code=code, code_type=code_type
+        )
         session.add(card_add)
         session.flush()
-        result=add_card_access_query(card_id=card_add.id,login=user.login,user=user)
+        result = add_card_access_query(card_id=card_add.id, login=user.login, user=user)
         logger.success(f"Добавлена карта {card_add.id} пользователя {user.login}")
     except Exception as err:
         logger.error(f"Не удалось добавить карту Ошибка {err}")
@@ -171,12 +194,12 @@ def add_card_query(name:str,about:str,user:User,code:str,code_type:str):
     return result
 
 
-def add_card_access_query(card_id:int,login:str,user:User):
-    if check_card(card_id=card_id)==True:
-        if check_card_own(card_id=card_id,user=user)==True:
+def add_card_access_query(card_id: int, login: str, user: User):
+    if check_card(card_id=card_id) == True:
+        if check_card_own(card_id=card_id, user=user) == True:
             try:
-                session=session_create
-                card_access=CardsAccess(user_login=login,card_id=card_id)
+                session = session_create
+                card_access = CardsAccess(user_login=login, card_id=card_id)
                 session.add(card_access)
                 session.commit()
                 result = {
@@ -185,7 +208,9 @@ def add_card_access_query(card_id:int,login:str,user:User):
                     "category": "success",
                     "cod": 201,
                 }
-                logger.success(f"Добавлена доступ на карту {card_id} пользователю {login}")
+                logger.success(
+                    f"Добавлена доступ на карту {card_id} пользователю {login}"
+                )
             except Exception as err:
                 logger.error(f"Не удалось добавить доступ на карту Ошибка {err}")
                 result = {
@@ -212,12 +237,15 @@ def add_card_access_query(card_id:int,login:str,user:User):
         }
     return result
 
-def update_card_name_query(card_id:int,user:User,name:str):
-    if check_card(card_id=card_id)==True:
-        if check_card_own(card_id=card_id,user=user)==True:
+
+def update_card_name_query(card_id: int, user: User, name: str):
+    if check_card(card_id=card_id) == True:
+        if check_card_own(card_id=card_id, user=user) == True:
             try:
-                session=session_create
-                session.execute(update(Cards).where(Cards.id==card_id).values(name=name))
+                session = session_create
+                session.execute(
+                    update(Cards).where(Cards.id == card_id).values(name=name)
+                )
                 session.commit()
                 logger.debug("Имя карты обновлено успешно")
                 result = {
@@ -252,12 +280,15 @@ def update_card_name_query(card_id:int,user:User,name:str):
         }
     return result
 
-def update_card_about_query(card_id:int,user:User,about:str):
-    if check_card(card_id=card_id)==True:
-        if check_card_own(card_id=card_id,user=user)==True:
+
+def update_card_about_query(card_id: int, user: User, about: str):
+    if check_card(card_id=card_id) == True:
+        if check_card_own(card_id=card_id, user=user) == True:
             try:
-                session=session_create
-                session.execute(update(Cards).where(Cards.id==card_id).values(about=about))
+                session = session_create
+                session.execute(
+                    update(Cards).where(Cards.id == card_id).values(about=about)
+                )
                 session.commit()
                 logger.debug("Описание карты обновлено успешно")
                 result = {
@@ -292,12 +323,17 @@ def update_card_about_query(card_id:int,user:User,about:str):
         }
     return result
 
-def update_card_code_query(card_id:int,user:User,code:str,code_type:str):
-    if check_card(card_id=card_id)==True:
-        if check_card_own(card_id=card_id,user=user)==True:
+
+def update_card_code_query(card_id: int, user: User, code: str, code_type: str):
+    if check_card(card_id=card_id) == True:
+        if check_card_own(card_id=card_id, user=user) == True:
             try:
-                session=session_create
-                session.execute(update(Cards).where(Cards.id==card_id).values(code=code,code_type=code_type))
+                session = session_create
+                session.execute(
+                    update(Cards)
+                    .where(Cards.id == card_id)
+                    .values(code=code, code_type=code_type)
+                )
                 session.commit()
                 logger.debug("Код карты обновлен успешно")
                 result = {
@@ -332,17 +368,24 @@ def update_card_code_query(card_id:int,user:User,code:str,code_type:str):
         }
     return result
 
-def update_card_own_query(card_id:int,user:User,own:str):
-    if check_card(card_id=card_id)==True:
-        if check_card_own(card_id=card_id,user=user)==True:
-            if check_user(login=own)==True:
+
+def update_card_own_query(card_id: int, user: User, own: str):
+    if check_card(card_id=card_id) == True:
+        if check_card_own(card_id=card_id, user=user) == True:
+            if check_user(login=own) == True:
                 try:
-                    session=session_create
-                    session.execute(update(Cards).where(Cards.id==card_id).values(own_login=own))
+                    session = session_create
+                    session.execute(
+                        update(Cards).where(Cards.id == card_id).values(own_login=own)
+                    )
                     session.commit()
-                    if check_card_access(card_id=card_id,user=user)==False:
-                        add_card_access_query(card_id=card_id,login=user.login,user=user)
-                    logger.success(f"Владелец карты {card_id} обновлен на {own} успешно")
+                    if check_card_access(card_id=card_id, user=user) == False:
+                        add_card_access_query(
+                            card_id=card_id, login=user.login, user=user
+                        )
+                    logger.success(
+                        f"Владелец карты {card_id} обновлен на {own} успешно"
+                    )
                     result = {
                         "result": True,
                         "message": "Владелец карты обновлен",
@@ -361,11 +404,11 @@ def update_card_own_query(card_id:int,user:User,own:str):
                     session.close()
             else:
                 result = {
-                "result": False,
-                "message": "Пользоватеь не найден",
-                "category": "warning",
-                "cod": 404,
-            }
+                    "result": False,
+                    "message": "Пользоватеь не найден",
+                    "category": "warning",
+                    "cod": 404,
+                }
         else:
             result = {
                 "result": False,
@@ -382,12 +425,15 @@ def update_card_own_query(card_id:int,user:User,own:str):
         }
     return result
 
-def update_card_image_query(card_id:int,user:User,image:str):
-    if check_card(card_id=card_id)==True:
-        if check_card_own(card_id=card_id,user=user)==True:
+
+def update_card_image_query(card_id: int, user: User, image: str):
+    if check_card(card_id=card_id) == True:
+        if check_card_own(card_id=card_id, user=user) == True:
             try:
-                session=session_create
-                session.execute(update(Cards).where(Cards.id==card_id).values(image=image))
+                session = session_create
+                session.execute(
+                    update(Cards).where(Cards.id == card_id).values(image=image)
+                )
                 session.commit()
                 logger.debug("Изображение карты обновлено успешно")
                 result = {
@@ -422,13 +468,16 @@ def update_card_image_query(card_id:int,user:User,image:str):
         }
     return result
 
-def delete_card_query(card_id:int,user:User):
-    if check_card(card_id=card_id)==True:
-        if check_card_own(card_id=card_id,user=user)==True:
+
+def delete_card_query(card_id: int, user: User):
+    if check_card(card_id=card_id) == True:
+        if check_card_own(card_id=card_id, user=user) == True:
             try:
-                session=session_create
-                session.execute(delete(Cards).where(Cards.id==card_id))
-                session.execute(delete(CardsAccess).where(CardsAccess.card_id==card_id))
+                session = session_create
+                session.execute(delete(Cards).where(Cards.id == card_id))
+                session.execute(
+                    delete(CardsAccess).where(CardsAccess.card_id == card_id)
+                )
                 session.commit()
                 logger.success("Карта удалена успешно")
                 result = {
