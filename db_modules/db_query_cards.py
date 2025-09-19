@@ -178,6 +178,7 @@ def add_card_query(name: str, about: str, user: User, code: str, code_type: str)
             name=name, about=about, own_login=user.login, code=code, code_type=code_type
         )
         session.add(card_add)
+        session.commit()
         session.flush()
         result = add_card_access_query(card_id=card_add.id, login=user.login, user=user)
         logger.success(f"Добавлена карта {card_add.id} пользователя {user.login}")
