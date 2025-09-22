@@ -4,6 +4,8 @@ from loguru import logger
 from db_modules.db_create import Cards, CardsAccess, session_create
 from db_modules.db_query import check_user
 from api.api_auth import User
+from db_modules.generators.code_generaters import check_code_type
+from db_modules.db_answer import error_cards_get, error_access,error_card_not_found,error_card_code_generate,error_update_card,error_user_not_found
 
 
 def check_card_access(card_id: int, user: User):
@@ -84,12 +86,7 @@ def all_cards_query():
         logger.debug("Получение списка карт прошло успешно")
     except Exception as err:
         logger.error(f"Не удалось получить карты из базы Ошибка {err}")
-        result = {
-            "result": False,
-            "message": "Ошибка сервера не удалось получить карты",
-            "category": "error",
-            "cod": 500,
-        }
+        result = error_cards_get
     finally:
         session.close()
     return result
@@ -114,12 +111,7 @@ def user_cards_query(user: User):
         logger.debug("Получение списка карт прошло успешно")
     except Exception as err:
         logger.error(f"Не удалось получить карты из базы Ошибка {err}")
-        result = {
-            "result": False,
-            "message": "Ошибка сервера не удалось получить карты",
-            "category": "error",
-            "cod": 500,
-        }
+        result = error_cards_get
     finally:
         session.close()
     return result
@@ -132,8 +124,8 @@ def get_card_query(card_id: int, user: User):
                 session = session_create
                 card_get = session.execute(
                     select(
-                        Cards.id, Cards.name, Cards.about, Cards.code, Cards.code_type
-                    )
+                        Cards.id, Cards.name, Cards.about, Cards.code_svg,
+                    ).where(Cards.id==card_id)
                 ).one()
                 card = card_get._mapping
                 result = {
@@ -155,43 +147,37 @@ def get_card_query(card_id: int, user: User):
             finally:
                 session.close()
         else:
-            result = {
-                "result": False,
-                "message": "Доступн запрещен",
-                "category": "warning",
-                "cod": 403,
-            }
+            result = error_access
     else:
-        result = {
-            "result": False,
-            "message": "Карта не найдена",
-            "category": "warning",
-            "cod": 404,
-        }
+        result = error_card_not_found
     return result
 
 
 def add_card_query(name: str, about: str, user: User, code: str, code_type: str):
-    try:
-        session = session_create
-        card_add = Cards(
-            name=name, about=about, own_login=user.login, code=code, code_type=code_type
-        )
-        session.add(card_add)
-        session.commit()
-        session.flush()
-        result = add_card_access_query(card_id=card_add.id, login=user.login, user=user)
-        logger.success(f"Добавлена карта {card_add.id} пользователя {user.login}")
-    except Exception as err:
-        logger.error(f"Не удалось добавить карту Ошибка {err}")
-        result = {
-            "result": False,
-            "message": "Ошибка сервера не удалось добавить карту",
-            "category": "error",
-            "cod": 500,
-        }
-    finally:
-        session.close()
+    code_svg=check_code_type(code=code,code_type=code_type)
+    if code_svg==None:
+        result = error_card_code_generate
+    else:
+        try:
+            session = session_create
+            card_add = Cards(
+                name=name, about=about, own_login=user.login, code_svg=code_svg
+            )
+            session.add(card_add)
+            session.commit()
+            session.flush()
+            result = add_card_access_query(card_id=card_add.id, login=user.login, user=user)
+            logger.success(f"Добавлена карта {card_add.id} пользователя {user.login}")
+        except Exception as err:
+            logger.error(f"Не удалось добавить карту Ошибка {err}")
+            result = {
+                "result": False,
+                "message": "Ошибка сервера не удалось добавить карту",
+                "category": "error",
+                "cod": 500,
+            }
+        finally:
+            session.close()
     return result
 
 
@@ -223,19 +209,9 @@ def add_card_access_query(card_id: int, login: str, user: User):
             finally:
                 session.close()
         else:
-            result = {
-                "result": False,
-                "message": "Доступн запрещен",
-                "category": "warning",
-                "cod": 403,
-            }
+            result = error_access
     else:
-        result = {
-            "result": False,
-            "message": "Карта не найдена",
-            "category": "warning",
-            "cod": 404,
-        }
+        result = error_card_not_found
     return result
 
 
@@ -256,29 +232,14 @@ def update_card_name_query(card_id: int, user: User, name: str):
                     "cod": 201,
                 }
             except Exception as err:
-                logger.error(f"Не удалось получить карту из базы Ошибка {err}")
-                result = {
-                    "result": False,
-                    "message": "Ошибка сервера не удалось получить информацию о карте",
-                    "category": "error",
-                    "cod": 500,
-                }
+                logger.error(f"Не удалось обновить информацию карты Ошибка {err}")
+                result = error_update_card
             finally:
                 session.close()
         else:
-            result = {
-                "result": False,
-                "message": "Доступн запрещен",
-                "category": "warning",
-                "cod": 403,
-            }
+            result = error_access
     else:
-        result = {
-            "result": False,
-            "message": "Карта не найдена",
-            "category": "warning",
-            "cod": 404,
-        }
+        result = error_card_not_found
     return result
 
 
@@ -299,74 +260,48 @@ def update_card_about_query(card_id: int, user: User, about: str):
                     "cod": 201,
                 }
             except Exception as err:
-                logger.error(f"Не удалось получить карту из базы Ошибка {err}")
-                result = {
-                    "result": False,
-                    "message": "Ошибка сервера не удалось получить информацию о карте",
-                    "category": "error",
-                    "cod": 500,
-                }
+                logger.error(f"Не удалось обновить инфомацию карты из базы Ошибка {err}")
+                result = error_update_card
             finally:
                 session.close()
         else:
-            result = {
-                "result": False,
-                "message": "Доступн запрещен",
-                "category": "warning",
-                "cod": 403,
-            }
+            result = error_access
     else:
-        result = {
-            "result": False,
-            "message": "Карта не найдена",
-            "category": "warning",
-            "cod": 404,
-        }
+        result = error_card_not_found
     return result
 
 
 def update_card_code_query(card_id: int, user: User, code: str, code_type: str):
     if check_card(card_id=card_id) == True:
         if check_card_own(card_id=card_id, user=user) == True:
-            try:
-                session = session_create
-                session.execute(
-                    update(Cards)
-                    .where(Cards.id == card_id)
-                    .values(code=code, code_type=code_type)
-                )
-                session.commit()
-                logger.debug("Код карты обновлен успешно")
-                result = {
-                    "result": True,
-                    "message": "Код карты обновлен",
-                    "category": "success",
-                    "cod": 201,
-                }
-            except Exception as err:
-                logger.error(f"Не удалось получить карту из базы Ошибка {err}")
-                result = {
-                    "result": False,
-                    "message": "Ошибка сервера не удалось получить информацию о карте",
-                    "category": "error",
-                    "cod": 500,
-                }
-            finally:
-                session.close()
+            code_svg=check_code_type(code=code,code_type=code_type)
+            if code_svg==None:
+                result = error_card_code_generate
+            else:
+                try:
+                    session = session_create
+                    session.execute(
+                        update(Cards)
+                        .where(Cards.id == card_id)
+                        .values(code=code, code_type=code_type)
+                    )
+                    session.commit()
+                    logger.debug("Код карты обновлен успешно")
+                    result = {
+                        "result": True,
+                        "message": "Код карты обновлен",
+                        "category": "success",
+                        "cod": 201,
+                    }
+                except Exception as err:
+                    logger.error(f"Не удалось обновить информацию карты Ошибка {err}")
+                    result = error_update_card
+                finally:
+                    session.close()
         else:
-            result = {
-                "result": False,
-                "message": "Доступн запрещен",
-                "category": "warning",
-                "cod": 403,
-            }
+            result = error_access
     else:
-        result = {
-            "result": False,
-            "message": "Карта не найдена",
-            "category": "warning",
-            "cod": 404,
-        }
+        result = error_card_not_found
     return result
 
 
@@ -394,36 +329,16 @@ def update_card_own_query(card_id: int, user: User, own: str):
                         "cod": 201,
                     }
                 except Exception as err:
-                    logger.error(f"Не удалось получить карту из базы Ошибка {err}")
-                    result = {
-                        "result": False,
-                        "message": "Ошибка сервера не удалось получить информацию о карте",
-                        "category": "error",
-                        "cod": 500,
-                    }
+                    logger.error(f"Не удалось обновить информацию карты Ошибка {err}")
+                    result = error_update_card
                 finally:
                     session.close()
             else:
-                result = {
-                    "result": False,
-                    "message": "Пользоватеь не найден",
-                    "category": "warning",
-                    "cod": 404,
-                }
+                result = error_user_not_found
         else:
-            result = {
-                "result": False,
-                "message": "Доступн запрещен",
-                "category": "warning",
-                "cod": 403,
-            }
+            result = error_access
     else:
-        result = {
-            "result": False,
-            "message": "Карта не найдена",
-            "category": "warning",
-            "cod": 404,
-        }
+        result = error_card_not_found
     return result
 
 
@@ -444,29 +359,14 @@ def update_card_image_query(card_id: int, user: User, image: str):
                     "cod": 201,
                 }
             except Exception as err:
-                logger.error(f"Не удалось получить карту из базы Ошибка {err}")
-                result = {
-                    "result": False,
-                    "message": "Ошибка сервера не удалось получить информацию о карте",
-                    "category": "error",
-                    "cod": 500,
-                }
+                logger.error(f"Не удалось обновить информацию карты Ошибка {err}")
+                result = error_update_card
             finally:
                 session.close()
         else:
-            result = {
-                "result": False,
-                "message": "Доступн запрещен",
-                "category": "warning",
-                "cod": 403,
-            }
+            result = error_access
     else:
-        result = {
-            "result": False,
-            "message": "Карта не найдена",
-            "category": "warning",
-            "cod": 404,
-        }
+        result = error_card_not_found
     return result
 
 
@@ -498,17 +398,7 @@ def delete_card_query(card_id: int, user: User):
             finally:
                 session.close()
         else:
-            result = {
-                "result": False,
-                "message": "Доступн запрещен",
-                "category": "warning",
-                "cod": 403,
-            }
+            result = error_access
     else:
-        result = {
-            "result": False,
-            "message": "Карта не найдена",
-            "category": "warning",
-            "cod": 404,
-        }
+        result = error_card_not_found
     return result

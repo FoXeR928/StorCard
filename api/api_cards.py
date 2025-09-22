@@ -17,6 +17,7 @@ from db_modules.db_query_cards import (
     update_card_own_query,
     add_card_access_query,
 )
+from api.api_answer import error_access,error_auth
 
 try:
     cards_app = APIRouter(prefix="/cards", tags=["Карты"])
@@ -61,15 +62,13 @@ class AddCardAccess(Card):
 async def get_cards_all_api(
     response: Response, current_user: User = Depends(get_current_user)
 ):
-    if current_user.is_admin == True:
-        result = all_cards_query()
+    if current_user==None:
+        result=error_auth
     else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
+        if current_user.is_admin == True:
+            result = all_cards_query()
+        else:
+            result = error_access
     response.status_code = result["cod"]
     del result["cod"]
     return result
