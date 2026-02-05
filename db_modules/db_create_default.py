@@ -51,11 +51,15 @@ def create_default_config(
     app_port: int = 7000,
     token: str = secrets.token_hex(64),
     debug: bool = False,
+    cert: str="ssl.pem",
+    cert_key: str="key.pem"
 ):
     configs_list = (
         ("app_port", "Порт приложения", app_port, "number"),
         ("skey", "Ключ для генерации OAuth2 токена", token, "text"),
         ("debug", "Подробное логирование", debug, "boolen"),
+        ("cert","Файл сертификат",cert,"text"),
+        ("cert_key","Файл сертификат",cert_key,"text")
     )
     session = session_create
     base = Configs
