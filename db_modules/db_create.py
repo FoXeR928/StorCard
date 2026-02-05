@@ -11,14 +11,10 @@ def init_confg():
     try:
         with open("./instance/config.json", "r") as file_config:
             config = json.load(file_config)
-        logger.info(
-            "\u0418\u043d\u0438\u0446\u0438\u0430\u043b\u0438\u0437\u0438\u0440\u043e\u0432\u0430\u043d \u043a\u043e\u043d\u0444\u0438\u0433 \u0431\u0430\u0437\u044b \u0434\u0430\u043d\u043d\u044b\u0445"
-        )
+        logger.info("Config file init")
         return config
     except Exception as err:
-        logger.critical(
-            f"\u041e\u0448\u0438\u0431\u043a\u0430 \u0438\u043d\u0438\u0446\u0438\u0430\u043b\u0438\u0437\u0430\u0446\u0438\u0438 \u043a\u043e\u043d\u0444\u0438\u0433\u043e\u0432 \u0431\u0430\u0437\u044b \u0434\u0430\u043d\u043d\u044b\u0445: {err}"
-        )
+        logger.critical(f"Config file init failed. Error: {err}")
         exit()
 
 
