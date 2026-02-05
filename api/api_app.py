@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import tomllib
 from loguru import logger
 
 def init_pages():
@@ -38,11 +39,23 @@ if os.path.exists("./instance/config.json") == True:
 
     create_default_config()
     create_default_users()
+
+try:
+    with open("./pyproject.toml","rb") as file:
+        data=tomllib.load(file)
+    project=data.get("project",{})
+    app_name=project.get("name")
+    app_version=project.get("version")
+    logger.info("Информация о приложении получена")
+except Exception as err:
+    logger.critical(f"Ошибка получения информации о приложении: {err}")
+    exit()
+
 try:
     app = FastAPI(
         title="StorCard",
         description="StorCard is your own server for storing discount cards",
-        version="0.4.3-alfa",
+        version=app_version,
         summary="Сервер",
     )
 except Exception as err:
@@ -62,4 +75,4 @@ init_pages()
 
 @app.get("/status", summary="Проверка сервера")
 async def get_status_api():
-    return {"status":"OK"}
+    return {"status":"OK","app":app_name,"version": app_version}
