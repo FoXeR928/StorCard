@@ -30,7 +30,7 @@ def create_config_app_start_query(
             json.dump(data, file_config, indent=4)
         result = {
             "result": True,
-            "message": "\u0421\u0442\u0430\u0440\u0442\u043e\u0432\u044b\u0439 \u043a\u043e\u043d\u0444\u0438\u0433 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f \u0437\u0430\u0434\u0430\u043d",
+            "message": "Config file create",
             "category": "success",
             "cod": 200,
         }
@@ -49,15 +49,15 @@ def create_config_app_start_query(
         session.commit()
         session.close()
         logger.success(
-            f"\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u044b \u0432 \u0431\u0430\u0437\u0443 \u043a\u043e\u043d\u0444\u0438\u0433\u0438 \u0434\u043b\u044f \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f"
+            f"Port write in base"
         )
     except Exception as err:
         logger.error(
-            f"\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0434\u0430\u0442\u044c \u0441\u0442\u0430\u0440\u0442\u043e\u0432\u044b\u0435 \u043a\u043e\u043d\u0444\u0438\u0433\u0438 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f \u041e\u0448\u0438\u0431\u043a\u0430 {err}"
+            f"Failed write port in base. Error: {err}"
         )
         result = {
             "result": False,
-            "message": "\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u0435\u0440\u0432\u0435\u0440\u0430 \u0441\u0442\u0430\u0440\u0442\u043e\u0432\u044b\u0439 \u043a\u043e\u043d\u0444\u0438\u0433 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f \u043d\u0435 \u0437\u0430\u0434\u0430\u043d",
+            "message": "Failed write port in base.",
             "category": "error",
             "cod": 500,
         }

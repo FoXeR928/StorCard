@@ -2,6 +2,8 @@ from fastapi import APIRouter, Response
 from pydantic import BaseModel
 from typing import Optional
 from loguru import logger
+import os
+import sys
 
 from db_modules.db_query_config_start import create_config_app_start_query
 
@@ -42,4 +44,10 @@ async def start_configs_app_api(
     )
     response.status_code = result["cod"]
     del result["cod"]
+    if result["result"]==True:
+        try:
+            logger.info("Server restart")
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        except Exception as err:
+            logger.error(f"Server not restart. Please, restart it. Error: {err}")
     return result
