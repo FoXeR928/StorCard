@@ -109,7 +109,6 @@ class Cards(Base):
     own_login: Mapped[str] = mapped_column(
         ForeignKey(Users.login, onupdate="CASCADE", ondelete="CASCADE"), nullable=False
     )
-    code_svg: Mapped[str] = mapped_column(BLOB,nullable=False)
     image: Mapped[str] = mapped_column(BLOB, nullable=True)
     date_create: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), default=datetime.now()

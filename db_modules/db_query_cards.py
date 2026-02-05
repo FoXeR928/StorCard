@@ -4,7 +4,6 @@ from loguru import logger
 from db_modules.db_create import Cards, CardsAccess, session_create
 from db_modules.db_query import check_user
 from api.api_auth import User
-from db_modules.generators.code_generaters import check_code_type
 from db_modules.db_answer import error_cards_get, error_access,error_card_not_found,error_card_code_generate,error_update_card,error_user_not_found
 
 
@@ -154,30 +153,26 @@ def get_card_query(card_id: int, user: User):
 
 
 def add_card_query(name: str, about: str, user: User, code: str, code_type: str):
-    code_svg=check_code_type(code=code,code_type=code_type)
-    if code_svg==None:
-        result = error_card_code_generate
-    else:
-        try:
-            session = session_create
-            card_add = Cards(
-                name=name, about=about, own_login=user.login, code_svg=code_svg
-            )
-            session.add(card_add)
-            session.commit()
-            session.flush()
-            result = add_card_access_query(card_id=card_add.id, login=user.login, user=user)
-            logger.success(f"Добавлена карта {card_add.id} пользователя {user.login}")
-        except Exception as err:
-            logger.error(f"Не удалось добавить карту Ошибка {err}")
-            result = {
-                "result": False,
-                "message": "Ошибка сервера не удалось добавить карту",
-                "category": "error",
-                "cod": 500,
-            }
-        finally:
-            session.close()
+    try:
+        session = session_create
+        card_add = Cards(
+            name=name, about=about, own_login=user.login, code_svg=code_svg
+        )
+        session.add(card_add)
+        session.commit()
+        session.flush()
+        result = add_card_access_query(card_id=card_add.id, login=user.login, user=user)
+        logger.success(f"Добавлена карта {card_add.id} пользователя {user.login}")
+    except Exception as err:
+        logger.error(f"Не удалось добавить карту Ошибка {err}")
+        result = {
+            "result": False,
+            "message": "Ошибка сервера не удалось добавить карту",
+            "category": "error",
+            "cod": 500,
+        }
+    finally:
+        session.close()
     return result
 
 
