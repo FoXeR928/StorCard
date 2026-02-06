@@ -31,7 +31,7 @@ class Auth(User):
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     login = decode_token(token=token)
     if login == None:
-        pass
+        user=(None,None,None)
     else:
         user = get_current_user_query(login=login)
         return User(login=user[0], name=user[1], is_admin=bool(int(user[2])))

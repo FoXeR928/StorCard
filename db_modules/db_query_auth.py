@@ -28,14 +28,18 @@ def create_token(data: dict, expires_use: bool = False):
 
 
 def decode_token(token: str):
-    try:
-        payload = jwt.decode(jwt=token, key=get_config(name="skey"), algorithms="HS256")
-        user = payload.get("sub")
-    except Exception as err:
-        logger.error(f"Ошибка сервера чтения токена: {err}")
-        user = None
-    except jwt.ExpiredSignatureError as err:
-        user = None
+    if token!=None:
+        try:
+            payload = jwt.decode(jwt=token, key=get_config(name="skey"), algorithms="HS256")
+            user = payload.get("sub")
+        except jwt.ExpiredSignatureError:
+            logger.debug("Signature has expired")
+            user = None
+        except Exception as err:
+            logger.error(f"Ошибка сервера чтения токена: {err}")
+            user = None
+    else:
+        user=None
     return user
 
 

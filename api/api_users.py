@@ -35,7 +35,7 @@ class UpdateRole(LoginUpdate):
 async def get_users_api(
     response: Response, current_user: User = Depends(get_current_user)
 ):
-    if current_user.is_admin == True:
+    if current_user!=None and current_user.is_admin == True:
         result = get_users_query()
     else:
         result = {
