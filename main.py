@@ -8,7 +8,7 @@ from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from api.api_app import app
+from network.api.api_app import app
 
 def init_log(log_level_file="INFO", log_level_std="WARNING"):
     try:
@@ -33,7 +33,7 @@ def init_log(log_level_file="INFO", log_level_std="WARNING"):
         exit()
 
 def init_ssl(cert_file:str="ssl.pem",key_file:str="key.pem"):
-    if os.path.exists(f"./instance/cert/{cert_file}")==True and os.path.exists(f"./instance/cert/{key_file}"):
+    if os.path.exists(f"./data/instance/cert/{cert_file}")==True and os.path.exists(f"./instance/cert/{key_file}"):
         logger.info("Certificate found")
     else:
         try:
@@ -55,26 +55,26 @@ def init_ssl(cert_file:str="ssl.pem",key_file:str="key.pem"):
                 )
                 .sign(keyFileGenerate, hashes.SHA256())
             )
-            if os.path.exists("./instance")==False:
-                os.mkdir("./instance")
-            if os.path.exists("./instance/cert")==False:
-                os.mkdir("./instance/cert")
-            with open(f"./instance/cert/{key_file}", "wb") as f:
+            if os.path.exists("./data/instance")==False:
+                os.mkdir("./data/instance")
+            if os.path.exists("./data/instance/cert")==False:
+                os.mkdir("./data/instance/cert")
+            with open(f"./data/instance/cert/{key_file}", "wb") as f:
                 f.write(keyFileGenerate.private_bytes(
                     encoding=serialization.Encoding.PEM,
                     format=serialization.PrivateFormat.TraditionalOpenSSL,
                     encryption_algorithm=serialization.NoEncryption()
                 ))
             logger.success("File certificate key create")
-            with open(f"./instance/cert/{cert_file}", "wb") as f:
+            with open(f"./data/instance/cert/{cert_file}", "wb") as f:
                 f.write(cert.public_bytes(serialization.Encoding.PEM))
             logger.success("File certificate create")
         except Exception as err:
             logger.critical(f"Certificate not create. Error: {err}")
             exit()
 
-if os.path.exists("./instance/config.json") == True:
-    from db_modules.db_query_config import get_config
+if os.path.exists("./data/instance/config.json") == True:
+    from data.db_modules.db_query_config import get_config
 
     port = int(get_config(name="app_port"))
     cert_file=get_config(name="cert")
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         logger.success(
             f"Сервер запущен на порту {port}"
         )
-        uvicorn.run(app=app, host="0.0.0.0", port=port,ssl_certfile=f"./instance/cert/{cert_file}", ssl_keyfile=f"./instance/cert/{key_file}")
+        uvicorn.run(app=app, host="0.0.0.0", port=port,ssl_certfile=f"./data/instance/cert/{cert_file}", ssl_keyfile=f"./data/instance/cert/{key_file}")
     except Exception as err:
         logger.error(f"Ошибка запуски сервера: {err}")
     finally:
