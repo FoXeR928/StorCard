@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Response, Depends,HTTPException
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional
@@ -43,6 +43,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 )
 async def login_api(response: Response, auth: OAuth2PasswordRequestForm = Depends()):
     result = auth_query(login=auth.username, password=auth.password)
+    if result["cod"] != 200:
+        raise HTTPException(
+            status_code=result["cod"],
+            detail=result["message"]
+        )
     response.status_code = result["cod"]
     del result["cod"]
     return result
