@@ -3,6 +3,7 @@ import json
 import os
 from loguru import logger
 
+configPath="./data/instance"
 
 def create_config_app_start_query(
     app_port: int = 7000,
@@ -24,9 +25,9 @@ def create_config_app_start_query(
             "sql_password": sql_password,
             "db_path": db_path,
         }
-        if os.path.exists("./data/instance") == False:
-            os.mkdir("./data/instance")
-        with open("./data/instance/config.json", "w") as file_config:
+        if os.path.exists(configPath) == False:
+            os.mkdir("")
+        with open(f"{configPath}/config.json", "w") as file_config:
             json.dump(data, file_config, indent=4)
         result = {
             "result": True,

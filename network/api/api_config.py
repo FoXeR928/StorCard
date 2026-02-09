@@ -8,6 +8,7 @@ from data.db_modules.db_query_config import (
     get_configs_query,
     update_config_query,
 )
+from network.api.api_answer import error_access
 
 try:
     config_app = APIRouter(prefix="/configs", tags=["Конфиги"])

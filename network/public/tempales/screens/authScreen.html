@@ -5,21 +5,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="authForm -block -centerBlock -authBlock">
-    <label for="login" class="user -hide -server">Логин</label>
-    <input id="login" class="user -input -hide -server" type="text">
-    <label for="password" class="password -hide -server">Пароль</label>
-    <div class="password-block">
-        <input id="password" class="password -password" type="password">
-        <div id="password-show" class="password-control"></div>
+<main>
+    <div class="authForm -block -centerBlock -authBlock">
+        <label for="login" class="user">Логин</label>
+        <input id="login" class="user -input" type="text">
+        <label for="password" class="password -hide -server">Пароль</label>
+        <div class="password-block -input">
+            <input id="password" class="password -password" type="password">
+            <div id="password-show" class="password-control"></div>
+        </div>
+        <div class="check_box">
+            <label for="expires">Остаться в системе</label>
+            <input id="expires" class="expires -input" type="checkbox">
+        </div>
+        <button id="send_auth" onclick="auth()" class="button_send -button">Войти</button>
     </div>
-    <div class="check_box">
-        <label for="expires">Остаться в системе</label>
-        <input id="expires" class="expires -input" type="checkbox">
-    </div>
-    <button id="send_auth" onclick="auth()" class="button_send -button">Войти</button>
-</div>
+</main>
 {% endblock %}
 
 {% block scripts %}
+<script src="/static/js/webEffects/viewPassword.js"></script>
+<script src="/static/js/apiRequests/authRequests.js"></script>
 {% endblock %}

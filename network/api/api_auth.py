@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional
 
-from db_modules.db_query_auth import (
+from data.db_modules.db_query_auth import (
     auth_query,
     logout_query,
     decode_token,

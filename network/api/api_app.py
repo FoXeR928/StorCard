@@ -4,17 +4,18 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import tomllib
 from loguru import logger
+from data.db_modules.db_query_config_start import configPath
 
 def init_pages():
     try:
         app.mount("/static", StaticFiles(directory="network/public/static"), name="front")
-        if os.path.exists("./data/instance/config.json") == True:
+        if os.path.exists(f"{configPath}/config.json") == True:
             from network.api.api_auth import auth_app
             from network.api.api_config import config_app
             from network.api.api_users import users_app
             from network.api.api_cards import cards_app
             from network.web.admin_pages import admin_pages_app
-            from network.web.admin_pages import auth_pages_app
+            from network.web.auth_pages import auth_pages_app
 
             app.include_router(router=auth_app)
             app.include_router(router=config_app)
@@ -33,7 +34,7 @@ def init_pages():
         logger.error(f"Ошибка инициализации API: {err}")
 
 
-if os.path.exists("./data/instance/config.json") == True:
+if os.path.exists(f"{configPath}/config.json") == True:
     from data.db_modules.db_create_default import (
         create_default_users,
         create_default_config,

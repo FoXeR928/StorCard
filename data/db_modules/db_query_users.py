@@ -3,7 +3,7 @@ from loguru import logger
 
 from data.db_modules.db_create import Users, session_create
 from data.db_modules.db_query import check_user
-from data.api.api_auth import User
+from network.api.api_auth import User
 
 
 def check_user_opportunity(user: str, login: str):

@@ -11,7 +11,7 @@ except Exception as err:
     logger.error(f"Не удалось инициализировать веб-интерфейс авторизации: {err}")
 
 
-@admin_pages_app.get("/", summary="Авторизация")
+@auth_pages_app.get("/", summary="Авторизация")
 async def auth_page(request: Request):
     return templates.TemplateResponse(
         name="screens/authScreen.html", context={"request": request}
