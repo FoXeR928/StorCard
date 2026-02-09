@@ -3,14 +3,15 @@
 {% block title %}Авторизация{% endblock %}
 
 {% block styles %}
+<link rel="stylesheet" href="/static/styles/authStyle.css">
 {% endblock %}
 
 {% block content %}
-<div class="form_with_back -block">
+<div class="authForm -block -centerBlock -authBlock">
     <label for="login" class="user -hide -server">Логин</label>
     <input id="login" class="user -input -hide -server" type="text">
     <label for="password" class="password -hide -server">Пароль</label>
-    <div class="password-block -input">
+    <div class="password-block">
         <input id="password" class="password -password" type="password">
         <div id="password-show" class="password-control"></div>
     </div>
