@@ -24,9 +24,9 @@ def create_config_app_start_query(
             "sql_password": sql_password,
             "db_path": db_path,
         }
-        if os.path.exists("instance") == False:
-            os.mkdir("instance")
-        with open("instance/config.json", "w") as file_config:
+        if os.path.exists("./data/instance") == False:
+            os.mkdir("./data/instance")
+        with open("./data/instance/config.json", "w") as file_config:
             json.dump(data, file_config, indent=4)
         result = {
             "result": True,
@@ -34,8 +34,8 @@ def create_config_app_start_query(
             "category": "success",
             "cod": 200,
         }
-        from db_modules.db_create import Configs, session_create
-        from db_modules.db_create_default import (
+        from data.db_modules.db_create import Configs, session_create
+        from data.db_modules.db_create_default import (
             create_default_users,
             create_default_config,
         )

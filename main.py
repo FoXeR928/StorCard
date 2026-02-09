@@ -92,7 +92,7 @@ if __name__ == "__main__":
         logger.success(
             f"Сервер запущен на порту {port}"
         )
-        uvicorn.run(app=app, host="0.0.0.0", port=port,ssl_certfile=f"./instance/cert/{cert_file}", ssl_keyfile=f"./instance/cert/{key_file}")
+        uvicorn.run(app=app, host="0.0.0.0", port=port,ssl_certfile=f"./data/instance/cert/{cert_file}", ssl_keyfile=f"./data/instance/cert/{key_file}")
     except Exception as err:
         logger.error(f"Ошибка запуски сервера: {err}")
     finally:

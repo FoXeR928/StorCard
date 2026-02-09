@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Response, Depends
 from pydantic import BaseModel
 
-from api.api_auth import User, get_current_user
-from db_modules.db_query_users import (
+from network.api.api_auth import User, get_current_user
+from data.db_modules.db_query_users import (
     get_users_query,
     registration_user_query,
     update_password_user_query,
@@ -38,14 +38,8 @@ async def get_users_api(
     if current_user!=None and current_user.is_admin == True:
         result = get_users_query()
     else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
+        result = error_access
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -62,14 +56,8 @@ async def registration_user_api(
             password=registration_user.password,
         )
     else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
+        result = error_access
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -83,7 +71,6 @@ async def update_password_user_api(
         user_update=current_user, login=password.login, password=password.password
     )
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -96,14 +83,8 @@ async def update_role_user_api(
             user_update=current_user, login=role.login, is_admin=role.is_admin
         )
     else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
+        result = error_access
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -114,12 +95,6 @@ async def delet_user_api(
     if current_user.is_admin == True:
         result = delete_user_query(user_delet=current_user, login=login)
     else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
+        result = error_access
     response.status_code = result["cod"]
-    del result["cod"]
     return result

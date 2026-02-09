@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 import jwt
 from loguru import logger
 
-from db_modules.db_create import Users, session_create
-from db_modules.db_query import check_user
-from db_modules.db_query_config import get_config
+from data.db_modules.db_create import Users, session_create
+from data.db_modules.db_query import check_user
+from data.db_modules.db_query_config import get_config
 
 
 def create_token(data: dict, expires_use: bool = False):

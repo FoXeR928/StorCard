@@ -3,8 +3,8 @@ from pydantic import BaseModel
 from typing import Optional, List
 from loguru import logger
 
-from api.api_auth import User, get_current_user
-from db_modules.db_query_cards import (
+from network.api.api_auth import User, get_current_user
+from data.db_modules.db_query_cards import (
     all_cards_query,
     user_cards_query,
     get_card_query,
@@ -17,7 +17,7 @@ from db_modules.db_query_cards import (
     update_card_own_query,
     add_card_access_query,
 )
-from api.api_answer import error_access,error_auth
+from network.api.api_answer import error_access,error_auth
 
 try:
     cards_app = APIRouter(prefix="/cards", tags=["Карты"])
@@ -70,7 +70,6 @@ async def get_cards_all_api(
         else:
             result = error_access
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -80,7 +79,6 @@ async def get_cards_user_api(
 ):
     result = user_cards_query(user=current_user)
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -90,7 +88,6 @@ async def get_card_api(
 ):
     result = get_card_query(card_id=card_id, user=current_user)
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -106,7 +103,6 @@ async def add_card_api(
         code_type=add.code_type,
     )
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -120,7 +116,6 @@ async def add_card_access_api(
         card_id=access.id, login=access.login, user=current_user
     )
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -132,7 +127,6 @@ async def update_card_name_api(
 ):
     result = update_card_name_query(card_id=name.id, user=current_user, name=name.name)
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -146,7 +140,6 @@ async def update_card_about_api(
         card_id=about.id, user=current_user, about=about.about
     )
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -160,7 +153,6 @@ async def update_card_code_api(
         card_id=code.id, user=current_user, code=code.code, code_type=code.code_type
     )
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -172,7 +164,6 @@ async def update_card_code_api(
 ):
     result = update_card_own_query(card_id=own.id, user=current_user, own=own.own)
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -187,7 +178,6 @@ async def update_card_image_api(
         card_id=id, user=current_user, image=file.file.read()
     )
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -197,5 +187,4 @@ async def delete_card_api(
 ):
     result = delete_card_query(card_id=card.id, user=current_user)
     response.status_code = result["cod"]
-    del result["cod"]
     return result

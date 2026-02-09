@@ -5,7 +5,7 @@ from loguru import logger
 import os
 import sys
 
-from db_modules.db_query_config_start import create_config_app_start_query
+from data.db_modules.db_query_config_start import create_config_app_start_query
 
 try:
     config_start_app = APIRouter(
@@ -43,7 +43,6 @@ async def start_configs_app_api(
         db_path=configs_start_app.db_path,
     )
     response.status_code = result["cod"]
-    del result["cod"]
     if result["result"]==True:
         try:
             logger.info("Server restart")

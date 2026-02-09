@@ -1,10 +1,10 @@
 from sqlalchemy import select, update, delete
 from loguru import logger
 
-from db_modules.db_create import Cards, CardsAccess, session_create
-from db_modules.db_query import check_user
-from api.api_auth import User
-from db_modules.db_answer import error_cards_get, error_access,error_card_not_found,error_card_code_generate,error_update_card,error_user_not_found
+from data.db_modules.db_create import Cards, CardsAccess, session_create
+from data.db_modules.db_query import check_user
+from network.api.api_auth import User
+from data.db_modules.db_answer import error_cards_get, error_access,error_card_not_found,error_card_code_generate,error_update_card,error_user_not_found
 
 
 def check_card_access(card_id: int, user: User):

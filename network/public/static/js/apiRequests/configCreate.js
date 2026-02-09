@@ -1,21 +1,4 @@
-function select_driver(){
-    select=$("#sql_driver").val()
-    if (select=='sqlite'){
-        $('.-hide').hide()
-        $('.-local').show()
-    }else if (select=='postgresql'){
-        $('.-hide').hide()
-        $('#sql_host').val('localhost')
-        $('#sql_port').val(5432)
-        $('.-server').show()
-    }else if (select=='mysql'){
-        $('.-hide').hide()
-        $('#sql_host').val('localhost')
-        $('#sql_port').val(3306)
-        $('.-server').show()
-    }
-}
-function start_config_create(){
+function start_config_create(e){
     var app_port=$('#app_port').val()
     var sql_db=$('#sql_db').val()
     var sql_driver=$('#sql_driver').val()

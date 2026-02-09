@@ -2,7 +2,7 @@ from sqlalchemy import select, delete, func
 from loguru import logger
 import secrets
 
-from db_modules.db_create import Users, Configs, session_create
+from data.db_modules.db_create import Users, Configs, session_create
 
 
 def create_default_users(

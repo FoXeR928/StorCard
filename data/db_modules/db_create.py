@@ -9,7 +9,7 @@ from loguru import logger
 
 def init_confg():
     try:
-        with open("./instance/config.json", "r") as file_config:
+        with open("./data/instance/config.json", "r") as file_config:
             config = json.load(file_config)
         logger.info("Config file init")
         return config

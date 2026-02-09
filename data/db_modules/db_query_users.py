@@ -1,9 +1,9 @@
 from sqlalchemy import select, update, delete, func
 from loguru import logger
 
-from db_modules.db_create import Users, session_create
-from db_modules.db_query import check_user
-from api.api_auth import User
+from data.db_modules.db_create import Users, session_create
+from data.db_modules.db_query import check_user
+from data.api.api_auth import User
 
 
 def check_user_opportunity(user: str, login: str):

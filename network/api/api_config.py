@@ -3,8 +3,8 @@ from pydantic import BaseModel
 from typing import Any
 from loguru import logger
 
-from api.api_auth import User, get_current_user
-from db_modules.db_query_config import (
+from network.api.api_auth import User, get_current_user
+from data.db_modules.db_query_config import (
     get_configs_query,
     update_config_query,
 )
@@ -28,14 +28,8 @@ async def get_configs_app_api(
     if current_user != None and current_user.is_admin == True:
         result = get_configs_query()
     else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
+        result = error_access
     response.status_code = result["cod"]
-    del result["cod"]
     return result
 
 
@@ -48,12 +42,6 @@ async def update_config_app_api(
     if current_user.is_admin == True:
         result = update_config_query(name=config_data.name, value=config_data.value)
     else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
+        result = error_access
     response.status_code = result["cod"]
-    del result["cod"]
     return result

@@ -1,7 +1,7 @@
 from sqlalchemy import select, update
 from loguru import logger
 
-from db_modules.db_create import Configs, session_create
+from data.db_modules.db_create import Configs, session_create
 
 
 def check_config(name: str):
