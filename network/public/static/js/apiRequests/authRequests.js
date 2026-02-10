@@ -38,6 +38,7 @@ function get_token(){
     var token_get = document.cookie.match(/token=(.+?)(;|$)/);
     if (token_get==null){
         token=null
+        window.location.href="/"
     }else{
         token=token_get[1]
     }

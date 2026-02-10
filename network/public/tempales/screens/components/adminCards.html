@@ -1,0 +1,18 @@
+<section id="cards" class="cards -block">
+    <article class="main_nav">
+        <h3 class="block-name">Администрирование карт</h3>
+        <input oninput="search_on_page('_cards')" id="search_cards" type="text" class="search_input -separete_main -input_separete" placeholder="Поиск карт">
+        <button onclick="open_form()" class="button_add_cards -button_add" id="add_button"><span>&#10010</span></button>
+    </article>
+    <table class="table">
+        <thead>
+            <tr class="table_header">
+                <th class="table_element -table_header_first">Карта</th>
+                <th class="table_element">Владелец</th>
+                <th class="table_element -table_header_end -table-button"></th>
+            </tr>
+        </thead>
+        <tbody id="table_block_cards">
+        </tbody>
+    </table>
+</section>

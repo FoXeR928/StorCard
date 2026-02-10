@@ -81,61 +81,25 @@
     </div>
 </dialog>
 <main class="main -admin">
-    <section id="cards" class="cards -block">
-        <article class="main_nav">
-            <h3 class="block-name">Администрирование карт</h3>
-            <input oninput="search_on_page('_cards')" id="search_cards" type="text" class="search_input -separete_main -input_separete" placeholder="Поиск карт">
-        </article>
-        <table class="table">
-            <thead>
-                <tr class="table_header">
-                    <th class="table_element -table_header_first">Карта</th>
-                    <th class="table_element">Владелец</th>
-                    <th class="table_element -table_header_end -table-button"></th>
-                </tr>
-            </thead>
-            <tbody id="table_block_cards">
-            </tbody>
-        </table>
-    </section>
-    <section id="users" class="users -block -midle-block">
-        <article class="main_nav">
-            <h3 class="block-name">Пользователи</h3>
-            <input type="text" oninput="search_on_page('_users')" id="search_users" class="search_input -separete_main -input_separete" placeholder="Поиск пользователей">
-            <button onclick="open_form()" class="button_add_user -button_add" id="add_button"><span>&#10010</span></button>
-        </article>
-        <table class="table">
-            <thead>
-                <tr class="table_header">
-                    <th class="table_element -table_header_first">Логин</th>
-                    <th class="table_element">Имя</th>
-                    <th class="table_element">Роль</th>
-                    <th class="table_element -table_header_end -table-button"></th>
-                </tr>
-            </thead>
-            <tbody id="table_block_users">
-            </tbody>
-        </table>
-    </section>
-    <section id="configs" class="configs -block">
-        <article class="main_nav">
-            <h3 class="block-name">Конфигурации</h3>
-            <input oninput="search_on_page('_configs')" id="search_configs" type="text" class="search_input -separete_main -input_separete" placeholder="Поиск конфигов">
-        </article>
-        <table class="table">
-            <thead>
-                <tr class="table_header">
-                    <th class="table_element -table_header_first">Конфиг</th>
-                    <th class="table_element -hide-th">Описание</th>
-                    <th class="table_element -table_header_end -table-input">Значение</th>
-                </tr>
-            </thead>
-            <tbody id="table_block">
-            </tbody>
-        </table>
-    </section>
+    {% include "screens/components/adminCards.html" %}
+    {% include "screens/components/adminUsers.html" %}
+    {% include "screens/components/adminConfigs.html" %}
 </main>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/admin/admin.js"></script>
+<script src="/static/js/webEffects/formsVisible.js"></script>
+<script src="/static/js/webEffects/passwordError.js"></script>
+<script src="/static/js/webEffects/searchInput.js"></script>
+<script src="/static/js/webEffects/viewPassword.js"></script>
+<script src="/static/js/apiRequests/authRequests.js"></script>
+<script src="/static/js/apiRequests/cardsRequests.js"></script>
+<script src="/static/js/apiRequests/usersRequests.js"></script>
+<script src="/static/js/apiRequests/configsRequests.js"></script>
+<script>
+window.addEventListener('load', function() {
+    get_cards()
+    get_users()
+    get_configs()
+})
+</script>
 {% endblock %}

@@ -1,0 +1,19 @@
+<section id="users" class="users -block -midle-block">
+    <article class="main_nav">
+        <h3 class="block-name">Пользователи</h3>
+        <input type="text" oninput="search_on_page('_users')" id="search_users" class="search_input -separete_main -input_separete" placeholder="Поиск пользователей">
+        <button onclick="open_form()" class="button_add_user -button_add" id="add_button"><span>&#10010</span></button>
+    </article>
+    <table class="table">
+        <thead>
+            <tr class="table_header">
+                <th class="table_element -table_header_first">Логин</th>
+                <th class="table_element">Имя</th>
+                <th class="table_element">Роль</th>
+                <th class="table_element -table_header_end -table-button"></th>
+            </tr>
+        </thead>
+        <tbody id="table_block_users">
+        </tbody>
+    </table>
+</section>
