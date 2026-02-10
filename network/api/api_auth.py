@@ -41,8 +41,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     "/login",
     summary="Login API",
 )
-async def login_api(response: Response, auth: OAuth2PasswordRequestForm = Depends()):
-    result = auth_query(login=auth.username, password=auth.password)
+async def login_api(response: Response, auth: OAuth2PasswordRequestForm = Depends(),expires_use:bool=False):
+    result = auth_query(login=auth.username, password=auth.password,tokenTime=expires_use)
     if result["cod"] != 200:
         raise HTTPException(
             status_code=result["cod"],

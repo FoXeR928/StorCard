@@ -1,5 +1,5 @@
 from sqlalchemy import select, update
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,timezone
 import jwt
 from loguru import logger
 
@@ -8,9 +8,9 @@ from data.db_modules.db_query import check_user
 from data.db_modules.db_query_config import get_config
 
 
-def create_token(data: dict, expires_use: bool = False):
+def create_token(data: dict, expires_use: bool):
     try:
-        expire = datetime.utcnow()
+        expire = datetime.now(timezone.utc)
         if expires_use == True:
             expire += timedelta(days=7)
         else:
@@ -65,7 +65,7 @@ def get_current_user_query(login: str):
     return result
 
 
-def auth_query(login: str, password: str):
+def auth_query(login: str, password: str, tokenTime:bool):
     result_no_auth = {
         "result": False,
         "message": "Неверный логин или пароль",
@@ -91,7 +91,7 @@ def auth_query(login: str, password: str):
         finally:
             session.close()
         if check_auth == True:
-            token = create_token(data={"sub": login})
+            token = create_token(data={"sub": login},expires_use=tokenTime)
             if token != False:
                 result = {
                     "result": True,

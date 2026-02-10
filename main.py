@@ -34,7 +34,7 @@ def init_log(log_level_file="INFO", log_level_std="WARNING"):
         exit()
 
 def init_ssl(cert_file:str="ssl.pem",key_file:str="key.pem"):
-    if os.path.exists(f"{configPath}/cert/{cert_file}")==True and os.path.exists(f"./instance/cert/{key_file}"):
+    if os.path.exists(f"{configPath}/cert/{cert_file}")==True and os.path.exists(f"{configPath}/cert/{key_file}"):
         logger.info("Certificate found")
     else:
         try:
@@ -67,7 +67,7 @@ def init_ssl(cert_file:str="ssl.pem",key_file:str="key.pem"):
                     encryption_algorithm=serialization.NoEncryption()
                 ))
             logger.success("File certificate key create")
-            with open(f"./data/instance/cert/{cert_file}", "wb") as f:
+            with open(f"{configPath}/cert/{cert_file}", "wb") as f:
                 f.write(cert.public_bytes(serialization.Encoding.PEM))
             logger.success("File certificate create")
         except Exception as err:

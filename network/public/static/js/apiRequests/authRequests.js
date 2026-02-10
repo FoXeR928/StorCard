@@ -36,11 +36,10 @@ function auth(){
 
 function get_token(){
     var token_get = document.cookie.match(/token=(.+?)(;|$)/);
-    if (token_get==null){
-        token=null
-        window.location.href="/"
-    }else{
+    if (token_get){
         token=token_get[1]
+    }else{
+        window.location.href="/"
     }
     return token
 }
