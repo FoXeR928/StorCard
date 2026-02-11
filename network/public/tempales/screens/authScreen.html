@@ -9,16 +9,16 @@
     <div class="authForm -block -centerBlock -authBlock">
         <label for="login" class="user">Логин</label>
         <input id="login" class="user -input" type="text">
-        <label for="password" class="password -hide -server">Пароль</label>
+        <label for="password" class="password -server">Пароль</label>
         <div class="password-block -input">
             <input id="password" class="password -password" type="password">
-            <div id="password-show" class="password-control"></div>
+            <button id="password-show" class="password-control"><span></span></button>
         </div>
-        <div class="check_box">
+        <div class="check_box -input_custom">
             <label for="expires">Остаться в системе</label>
             <input id="expires" class="expires -input" type="checkbox">
         </div>
-        <button id="send_auth" onclick="auth()" class="button_send -button">Войти</button>
+        <button id="send_auth" onclick="auth()" class="button_send -button_back">Войти</button>
     </div>
 </main>
 {% endblock %}
