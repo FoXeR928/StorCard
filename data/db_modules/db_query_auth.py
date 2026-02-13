@@ -97,6 +97,7 @@ def auth_query(login: str, password: str, tokenTime:bool):
                     "result": True,
                     "access_token": token,
                     "token_type": "bearer",
+                    "login":login,
                     "message": "Авторизация прошла успешно",
                     "category": "success",
                     "cod": 200,

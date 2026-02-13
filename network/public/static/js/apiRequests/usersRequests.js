@@ -117,3 +117,7 @@ function update_user(){
         })
     }
 }
+
+function remove_user(){
+    
+}

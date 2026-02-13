@@ -25,3 +25,10 @@ function open_form(){
 function close_form(){
     $("#hide_form").hide();
 }
+
+function open_card_form(){
+    $("#hide_card_form").show();
+}
+function close_card_form(){
+    $("#hide_card_form").hide();
+}

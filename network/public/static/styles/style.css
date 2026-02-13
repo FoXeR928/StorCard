@@ -59,6 +59,11 @@ body{
     width: 100%;
     background: none;
 }
+.-password_view{
+    background: none;
+    border: none;
+    font-size: 12.5pt;
+}
 .-hide{
     display: none;
 }
