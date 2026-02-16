@@ -1,6 +1,9 @@
 {% extends "Main.html" %}
 {% block title %}Администрирование{% endblock %}
-{% block styles %}{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="/static/styles/cardStyle.css">
+<link rel="stylesheet" href="/static/styles/userStyle.css">
+{% endblock %}
 
 {% block content %}
 {% include "screens/components/hideForms/addCardForm.html" %}
