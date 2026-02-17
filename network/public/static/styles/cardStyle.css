@@ -4,3 +4,13 @@
 .-table_card_own{
     max-width: 40%;
 }
+.-td_card{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.-td_card_own{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

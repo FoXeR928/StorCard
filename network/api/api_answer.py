@@ -10,3 +10,9 @@ error_auth={
     "category": "warning",
     "cod": 401,
 }
+error_fail_auth = {
+    "result": False,
+    "message": "Неверный логин или пароль",
+    "category": "warning",
+    "cod": 401,
+}

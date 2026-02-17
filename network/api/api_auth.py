@@ -43,7 +43,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 )
 async def login_api(response: Response, auth: OAuth2PasswordRequestForm = Depends(),expires_use:bool=False):
     result = auth_query(login=auth.username, password=auth.password,tokenTime=expires_use)
-    if result["cod"] != 200:
+    if result["cod"] != 200 or result["cod"] != 201:
         raise HTTPException(
             status_code=result["cod"],
             detail=result["message"]

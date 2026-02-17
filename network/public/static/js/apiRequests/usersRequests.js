@@ -20,7 +20,7 @@ function get_users(){
                         role="Администратор"
                     }
                     $("#update_card_own").append('<option value="'+user.login+'">'+user.user_name+'</option>')
-                    $("#table_block_users").append('<tr class="table_body_element_block"><td class="table_element -table_body_element search_element search_element_users">'+user.login+'</td><td class="table_element -table_body_element">'+user.user_name+'</td><td class="table_element -table_body_element">'+role+'</td><td class="table_element_button -table_body_element"><button onclick="'+command+'" class="update_button -button">Изменить</button></td></tr>')
+                    $("#table_block_users").append('<tr class="table_body_element_block"><td class="table_element -table_body_element search_element search_element_users -td_user_login">'+user.login+'</td><td class="table_element -table_body_element -td_user_name">'+user.user_name+'</td><td class="table_element -table_body_element">'+role+'</td><td class="table_element_button -table_body_element"><button onclick="'+command+'" class="update_button -button">Изменить</button></td></tr>')
                 })
             }
         },

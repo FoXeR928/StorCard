@@ -7,6 +7,7 @@ from data.db_modules.db_create import Users, session_create
 from data.db_modules.db_query import check_user
 from data.db_modules.db_query_config import get_config
 
+from network.api.api_answer import error_fail_auth
 
 def create_token(data: dict, expires_use: bool):
     try:
@@ -15,7 +16,7 @@ def create_token(data: dict, expires_use: bool):
             expire += timedelta(days=7)
         else:
             expire += timedelta(minutes=30)
-        data["exp"] = expire
+        data["exp"] = int(expire.timestamp())
         encoded_jwt = jwt.encode(
             payload=data, key=get_config(name="skey"), algorithm="HS256"
         )
@@ -30,7 +31,7 @@ def create_token(data: dict, expires_use: bool):
 def decode_token(token: str):
     if token!=None:
         try:
-            payload = jwt.decode(jwt=token, key=get_config(name="skey"), algorithms="HS256")
+            payload = jwt.decode(jwt=token, key=get_config(name="skey"), algorithms="HS256",leeway=10)
             user = payload.get("sub")
         except jwt.ExpiredSignatureError:
             logger.debug("Signature has expired")
@@ -66,18 +67,6 @@ def get_current_user_query(login: str):
 
 
 def auth_query(login: str, password: str, tokenTime:bool):
-    result_no_auth = {
-        "result": False,
-        "message": "Неверный логин или пароль",
-        "category": "warning",
-        "cod": 401,
-    }
-    result_error = {
-        "result": False,
-        "message": "Ошибка сервера авторизация не удалась",
-        "category": "error",
-        "cod": 500,
-    }
     if check_user(login=login) == True:
         session = session_create
         try:
@@ -103,11 +92,16 @@ def auth_query(login: str, password: str, tokenTime:bool):
                     "cod": 200,
                 }
             else:
-                result = result_error
+                result = {
+                    "result": False,
+                    "message": "Ошибка сервера авторизация не удалась",
+                    "category": "error",
+                    "cod": 500,
+                }
         else:
-            result = result_no_auth
+            result = error_fail_auth
     else:
-        result = result_no_auth
+        result = error_fail_auth
     return result
 
 

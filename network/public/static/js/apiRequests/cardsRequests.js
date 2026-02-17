@@ -13,7 +13,7 @@ function get_cards(){
                 $("#table_block_cards").empty()
                 $.each(result.cards, function(index,card){
                     command="open_form_update_card('"+card.id+"')"
-                    $("#table_block_cards").append('<tr class="table_body_element_block"><td class="table_element -table_body_element search_element">'+card.name+'</td><td class="table_element -table_body_element search_element_cards">'+card.own_login+'</td><td class="table_element_button -table_body_element"><button onclick="'+command+'" class="update_button -button">Изменить</button></td></tr>')
+                    $("#table_block_cards").append('<tr class="table_body_element_block"><td class="table_element -table_body_element search_element -td_card">'+card.name+'</td><td class="table_element -table_body_element search_element_cards -td_card_own">'+card.own_login+'</td><td class="table_element_button -table_body_element"><button onclick="'+command+'" class="update_button -button">Изменить</button></td></tr>')
                 })
             }
         },

@@ -1,6 +1,13 @@
-.-table_user_login{
-    max-width: 30%;
+.-table_user_role{
+    width: 16%;
 }
-.-table_user_name{
-    max-width: 30%;
+.-td_user_name{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.-td_user_login{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

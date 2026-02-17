@@ -19,7 +19,7 @@ function auth(){
                 if (result["result"]==false){
                     create_flash(flash_status=result["categoty"],message=result["message"])
                 }else{
-                    document.cookie="token="+result["access_token"]
+                    localStorage.setItem('token', result.access_token);
                     create_flash(flash_status="success",message="Авторизация пройдена")
                     window.location.href="/admin"
                 }
@@ -34,12 +34,31 @@ function auth(){
     }
 }
 
-function get_token(){
-    var token_get = document.cookie.match(/token=(.+?)(;|$)/);
-    if (token_get){
-        token=token_get[1]
-    }else{
-        window.location.href="/"
+function get_token() {
+    const token = localStorage.getItem('token');
+    if (!token){
+        window.location.href = "/";
+        return null;
     }
-    return token
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (payload.exp < (currentTime - 10)) {
+            localStorage.removeItem('token');
+            window.location.href = "/";
+            create_flash(flash_status="error",message="Срок авторизации истек")
+            return null;
+        }
+        return token;
+    } catch (e) {
+        localStorage.removeItem('token');
+        window.location.href = "/";
+        create_flash(flash_status="error",message="Не удалось проверить авторизацию")
+        return null;
+    }
+}
+
+function auth_exit(){
+    localStorage.removeItem('token'); 
+    window.location.href = "/";
 }

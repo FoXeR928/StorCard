@@ -3,6 +3,7 @@
 {% block styles %}
 <link rel="stylesheet" href="/static/styles/cardStyle.css">
 <link rel="stylesheet" href="/static/styles/userStyle.css">
+<link rel="stylesheet" href="/static/styles/configStyle.css">
 {% endblock %}
 
 {% block content %}
@@ -10,6 +11,7 @@
 {% include "screens/components/hideForms/updateCardForm.html" %}
 {% include "screens/components/hideForms/addUserForm.html" %}
 {% include "screens/components/hideForms/updateUserForm.html" %}
+{% include "screens/components/headerPanel.html" %}
 <main class="main -admin">
     {% include "screens/components/adminCards.html" %}
     {% include "screens/components/adminUsers.html" %}
