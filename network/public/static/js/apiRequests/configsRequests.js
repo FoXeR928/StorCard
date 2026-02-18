@@ -4,7 +4,6 @@ function get_configs(){
         method:'GET',
         headers:{
             "Content-Type":"application/json",
-            "Authorization": "Bearer "+get_token()
         },
         success : function(result) {
             if (result["result"]==false){
@@ -46,7 +45,6 @@ function update_config(config,format){
             method:'PATCH',
             headers:{
                 "Content-Type":"application/json",
-                "Authorization": "Bearer "+get_token()
             },
             data:JSON.stringify({"name":config,"value":get_config}),
             success : function(result) {

@@ -18,7 +18,9 @@ def create_token(data: dict, expires_use: bool):
             expire += timedelta(minutes=30)
         data["exp"] = int(expire.timestamp())
         encoded_jwt = jwt.encode(
-            payload=data, key=get_config(name="skey"), algorithm="HS256"
+            payload=data, 
+            key=get_config(name="skey"), 
+            algorithm="HS256"
         )
         result = encoded_jwt
         logger.debug(f"Токен создан для пользователя {data['sub']}")
@@ -102,29 +104,4 @@ def auth_query(login: str, password: str, tokenTime:bool):
             result = error_fail_auth
     else:
         result = error_fail_auth
-    return result
-
-
-def logout_query(login: str):
-    session = session_create
-    try:
-        session.execute(update(Users).where(Users.login == login).values(token=None))
-        session.commit()
-        result = {
-            "result": True,
-            "message": "Пользователь деавторизирован",
-            "category": "success",
-            "cod": 201,
-        }
-        logger.debug(f"Пользователь {login} деавторизирован")
-    except Exception as err:
-        logger.error(f"Не удалось деавторизировать пользователя {login} Ошибка {err}")
-        return {
-            "result": False,
-            "message": "Ошибка сервера деавторизация не удалась",
-            "category": "error",
-            "cod": 500,
-        }
-    finally:
-        session.close()
     return result

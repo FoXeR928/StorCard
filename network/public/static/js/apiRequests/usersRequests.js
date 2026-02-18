@@ -4,7 +4,6 @@ function get_users(){
         method:'GET',
         headers:{
             "Content-Type":"application/json",
-            "Authorization": "Bearer "+get_token()
         },
         success : function(result) {
             if (result["result"]==false){
@@ -43,7 +42,6 @@ function create_user(){
             method:'POST',
             headers:{
                 "Content-Type":"application/json",
-                "Authorization": "Bearer "+get_token()
             },
             data:JSON.stringify(data_user),
             success : function(result) {
@@ -75,7 +73,6 @@ function update_user(){
             method:'PATCH',
             headers:{
                 "Content-Type":"application/json",
-                "Authorization": "Bearer "+get_token()
             },
             data:JSON.stringify(data_user),
             success : function(result) {
@@ -103,7 +100,6 @@ function update_user(){
             method:'PATCH',
             headers:{
                 "Content-Type":"application/json",
-                "Authorization": "Bearer "+get_token()
             },
             data:JSON.stringify(data_user),
             success : function(result) {

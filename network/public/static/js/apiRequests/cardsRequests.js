@@ -4,7 +4,6 @@ function get_cards(){
         method:'GET',
         headers:{
             "Content-Type":"application/json",
-            "Authorization": "Bearer "+get_token()
         },
         success : function(result) {
             if (result["result"]==false){
