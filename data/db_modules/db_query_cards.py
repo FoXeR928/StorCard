@@ -156,7 +156,7 @@ def add_card_query(name: str, about: str, user: User, code: str, code_type: str)
     try:
         session = session_create
         card_add = Cards(
-            name=name, about=about, own_login=user.login, code_svg=code_svg
+            name=name, about=about, own_login=user.login
         )
         session.add(card_add)
         session.commit()

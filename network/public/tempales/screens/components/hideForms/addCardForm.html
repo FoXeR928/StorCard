@@ -4,9 +4,18 @@
             <h2 class="form_h">Создание карты</h2>
             <button onclick="close_card_form()" class="form_close_button -button_del_close -button">X</button>
         </div>
-        <div id="form_create_user" class="form_users -form_column">
+        <div id="form_create_card" class="form_cards -form_column">
+            <div class="input_block -separete_block">
+                <label for="card_name" class='label_input -input_label'>Имя карты</label>
+                <input type="text" value="" id="card_name" class="card_name -input_with_label">
+            </div>
+            <div class="input_block -separete_block">
+                <label for="card_about" class='label_input -input_label'>Описание карты</label>
+                <input type="text" value="" id="card_about" class="card_about -input_with_label">
+            </div>
             <select id="code_format">
-                <option value="test">test</option>
+                <option value="" selected disabled hidden>Выборите кодировку</option>
+                <option value="QR-code">QR</option>
             </select>
             <div class="input_block -separete_block">
                 <label for="code" class='label_input -input_label'>Код карты</label>
