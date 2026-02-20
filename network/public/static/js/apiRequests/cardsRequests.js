@@ -5,6 +5,12 @@ function get_cards(){
         headers:{
             "Content-Type":"application/json",
         },
+        statusCode:{
+            401:function(){
+                create_flash("warning","Авторизация не пройдена")
+                window.location.href="/"
+            }
+        },
         success : function(result) {
             if (result["result"]==false){
                 create_flash(result["category"],result["message"])
@@ -19,7 +25,7 @@ function get_cards(){
         error: function(error){
             console.log(error);
             create_flash("error","Список карт не получен")
-        }
+        },
     })
 }
 
@@ -31,22 +37,59 @@ function create_card(){
     if (card_name!=="" && card_coder!=="" && card_code!==""){
         data_card={"name":card_name,"about":card_about,"code":card_code,"code_type":card_coder}
         $.ajax({
-        url:'/cards/add',
-        method:'POST',
-        headers:{
-            "Content-Type":"application/json",
-        },
-        data:JSON.stringify(data_card),
-        success : function(result) {
-            create_flash(result["category"],result["message"])
-        },
-        error: function(error){
-            console.log(error);
-            create_flash("error","Не удалось отправить запрс на создание карты")
-        }
-    })
+            url:'/cards/add',
+            method:'POST',
+            headers:{
+                "Content-Type":"application/json",
+            },
+            data:JSON.stringify(data_card),
+            statusCode:{
+                401:function(){
+                    create_flash("warning","Авторизация не пройдена")
+                    window.location.href="/"
+                }
+            },
+            success : function(result) {
+                create_flash(result["category"],result["message"])
+                close_card_form()
+                get_cards()
+            },
+            error: function(error){
+                console.log(error);
+                create_flash("error","Не удалось отправить запрс на создание карты")
+            }
+        })
     }else{
         create_flash("warning","Информация о карте не указана")
+    }
+}
+
+function remove_card(){
+    card_id=$("#update_card").val()
+    if (card_id!==""){
+        $.ajax({
+            url:'/cards/delete',
+            method:'DELETE',
+            headers:{
+                "Content-Type":"application/json",
+            },
+            data:JSON.stringify({"id":card_id}),
+            statusCode:{
+                401:function(){
+                    create_flash("warning","Авторизация не пройдена")
+                    window.location.href="/"
+                }
+            },
+            success : function(result) {
+                create_flash(result["category"],result["message"])
+                close_form_update_card()
+                get_cards()
+            },
+            error: function(error){
+                console.log(error);
+                create_flash("error","Не удалось отправить запрс на создание карты")
+            }
+        })
     }
 }
 

@@ -30,5 +30,9 @@ function open_card_form(){
     $("#hide_card_form").show();
 }
 function close_card_form(){
+    $("#card_name").val("")
+    $("#card_about").val("")
+    $("#code_format").val("")
+    $("#code").val("")
     $("#hide_card_form").hide();
 }

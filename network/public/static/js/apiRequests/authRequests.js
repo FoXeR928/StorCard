@@ -25,7 +25,7 @@ function auth(){
             },
             error: function(error){
                 console.log(error);
-                create_flash(flash_status="warning",message="Авторизация пройдена")
+                create_flash(flash_status="warning",message="Авторизация не пройдена из-за ошибки")
             }
         })
     }else{

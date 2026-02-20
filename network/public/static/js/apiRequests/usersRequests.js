@@ -5,6 +5,12 @@ function get_users(){
         headers:{
             "Content-Type":"application/json",
         },
+        statusCode:{
+            401:function(){
+                create_flash("warning","Авторизация не пройдена")
+                window.location.href="/"
+            }
+        },
         success : function(result) {
             if (result["result"]==false){
                 create_flash(result["category"],result["message"])
@@ -44,6 +50,12 @@ function create_user(){
                 "Content-Type":"application/json",
             },
             data:JSON.stringify(data_user),
+            statusCode:{
+                401:function(){
+                    create_flash("warning","Авторизация не пройдена")
+                    window.location.href="/"
+                }
+            },
             success : function(result) {
                 create_flash(result["category"],result["message"])
                 get_users()
@@ -75,6 +87,12 @@ function update_user(){
                 "Content-Type":"application/json",
             },
             data:JSON.stringify(data_user),
+            statusCode:{
+                401:function(){
+                    create_flash("warning","Авторизация не пройдена")
+                    window.location.href="/"
+                }
+            },
             success : function(result) {
                 create_flash(result["category"],result["message"])
                 close_form_update()
@@ -102,6 +120,12 @@ function update_user(){
                 "Content-Type":"application/json",
             },
             data:JSON.stringify(data_user),
+            statusCode:{
+                401:function(){
+                    create_flash("warning","Авторизация не пройдена")
+                    window.location.href="/"
+                }
+            },
             success : function(result) {
                 create_flash(result["category"],result["message"])
                 close_form_update()

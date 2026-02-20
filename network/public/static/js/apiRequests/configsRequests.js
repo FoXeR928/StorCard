@@ -5,6 +5,12 @@ function get_configs(){
         headers:{
             "Content-Type":"application/json",
         },
+        statusCode:{
+            401:function(){
+                create_flash("warning","Авторизация не пройдена")
+                window.location.href="/"
+            }
+        },
         success : function(result) {
             if (result["result"]==false){
                 create_flash(result["category"],result["message"])
@@ -47,6 +53,12 @@ function update_config(config,format){
                 "Content-Type":"application/json",
             },
             data:JSON.stringify({"name":config,"value":get_config}),
+            statusCode:{
+                401:function(){
+                    create_flash("warning","Авторизация не пройдена")
+                    window.location.href="/"
+                }
+            },
             success : function(result) {
                 create_flash(result["category"],result["message"])
                 get_configs()
