@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select
 from datetime import datetime, timedelta,timezone
 import jwt
 from loguru import logger
@@ -78,7 +78,7 @@ def auth_query(login: str, password: str, tokenTime:bool):
         except Exception as err:
             session.close()
             logger.error(f"Не удалось авторизировать пользователя {login} Ошибка {err}")
-            raise result_error
+            raise error_fail_auth
         finally:
             session.close()
         if check_auth == True:
@@ -88,7 +88,6 @@ def auth_query(login: str, password: str, tokenTime:bool):
                     "result": True,
                     "access_token": token,
                     "token_type": "bearer",
-                    "login":login,
                     "message": "Авторизация прошла успешно",
                     "category": "success",
                     "cod": 200,
