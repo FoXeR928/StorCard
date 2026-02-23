@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response, Depends,HTTPException, Request
+from fastapi import APIRouter, Response, Depends,HTTPException, Request,Form
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional
@@ -30,6 +30,25 @@ class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
             else:
                 return None
         return token
+    
+class CustomOAuth2Form(OAuth2PasswordRequestForm):
+    def __init__(
+        self,
+        username: str = Form(...),
+        password: str = Form(...),
+        expires_use: bool = Form(False),
+        scope: str = Form(""),
+        client_id: Optional[str] = Form(None),
+        client_secret: Optional[str] = Form(None),
+    ):
+        super().__init__(
+            username=username, 
+            password=password, 
+            scope=scope, 
+            client_id=client_id, 
+            client_secret=client_secret
+        )
+        self.expires_use = expires_use
 
 oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="auth/login")
 
@@ -59,15 +78,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     "/login",
     summary="Login API",
 )
-async def login_api(response: Response, auth: OAuth2PasswordRequestForm = Depends(),expires_use:bool=False):
-    result = auth_query(login=auth.username, password=auth.password,tokenTime=expires_use)
+async def login_api(response: Response, auth: CustomOAuth2Form = Depends()):
+    result = auth_query(login=auth.username, password=auth.password,tokenTime=auth.expires_use)
     if result["cod"] not in [200, 201]:
         raise HTTPException(
             status_code=result["cod"],
             detail=result["message"]
         )
     token=result["access_token"]
-    max_age=604800 if expires_use else 1800
+    max_age=604800 if auth.expires_use else 1800
     response.set_cookie(
         key="token",
         value=token,

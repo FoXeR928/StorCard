@@ -95,7 +95,7 @@ def user_cards_query(user: User):
     try:
         session = session_create
         cards_get = session.execute(
-            select(Cards.id, Cards.name, Cards.about, Cards.own_login)
+            select(Cards.id, Cards.name, Cards.own_login)
             .join(CardsAccess)
             .where(CardsAccess.user_login == user.login)
         ).all()
@@ -123,7 +123,7 @@ def get_card_query(card_id: int, user: User):
                 session = session_create
                 card_get = session.execute(
                     select(
-                        Cards.id, Cards.name, Cards.about, Cards.code_svg,
+                        Cards.id, Cards.name, Cards.about,Cards.code,Cards.code_type
                     ).where(Cards.id==card_id)
                 ).one()
                 card = card_get._mapping
@@ -156,7 +156,7 @@ def add_card_query(name: str, about: str, user: User, code: str, code_type: str)
     try:
         session = session_create
         card_add = Cards(
-            name=name, about=about, own_login=user.login
+            name=name, about=about, own_login=user.login,code=code,code_type=code_type
         )
         session.add(card_add)
         session.commit()
@@ -269,30 +269,26 @@ def update_card_about_query(card_id: int, user: User, about: str):
 def update_card_code_query(card_id: int, user: User, code: str, code_type: str):
     if check_card(card_id=card_id) == True:
         if check_card_own(card_id=card_id, user=user) == True:
-            code_svg=check_code_type(code=code,code_type=code_type)
-            if code_svg==None:
-                result = error_card_code_generate
-            else:
-                try:
-                    session = session_create
-                    session.execute(
-                        update(Cards)
-                        .where(Cards.id == card_id)
-                        .values(code=code, code_type=code_type)
-                    )
-                    session.commit()
-                    logger.debug("Код карты обновлен успешно")
-                    result = {
-                        "result": True,
-                        "message": "Код карты обновлен",
-                        "category": "success",
-                        "cod": 201,
-                    }
-                except Exception as err:
-                    logger.error(f"Не удалось обновить информацию карты Ошибка {err}")
-                    result = error_update_card
-                finally:
-                    session.close()
+            try:
+                session = session_create
+                session.execute(
+                    update(Cards)
+                    .where(Cards.id == card_id)
+                    .values(code=code, code_type=code_type)
+                )
+                session.commit()
+                logger.debug("Код карты обновлен успешно")
+                result = {
+                    "result": True,
+                    "message": "Код карты обновлен",
+                    "category": "success",
+                    "cod": 201,
+                }
+            except Exception as err:
+                logger.error(f"Не удалось обновить информацию карты Ошибка {err}")
+                result = error_update_card
+            finally:
+                session.close()
         else:
             result = error_access
     else:
