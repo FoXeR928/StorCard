@@ -25,6 +25,7 @@ class ConfigStartApp(BaseModel):
     sql_user: Optional[str] = None
     sql_password: Optional[str] = None
     db_path: Optional[str] = "./instance"
+    front: Optional[bool] = True
 
 
 @config_start_app.post("/create", summary="Создание установочных конфигов приложения")
@@ -41,9 +42,10 @@ async def start_configs_app_api(
         sql_user=configs_start_app.sql_user,
         sql_password=configs_start_app.sql_password,
         db_path=configs_start_app.db_path,
+        front=config_start_app.front,
     )
     response.status_code = result["cod"]
-    if result["result"]==True:
+    if result["result"] == True:
         try:
             logger.info("Server restart")
             os.execv(sys.executable, [sys.executable] + sys.argv)

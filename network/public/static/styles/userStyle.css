@@ -1,3 +1,6 @@
+.users{
+    display: none;
+}
 .-table_user_role{
     width: 16%;
 }

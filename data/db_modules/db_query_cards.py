@@ -4,7 +4,14 @@ from loguru import logger
 from data.db_modules.db_create import Cards, CardsAccess, session_create
 from data.db_modules.db_query import check_user
 from network.api.api_auth import User
-from data.db_modules.db_answer import error_cards_get, error_access,error_card_not_found,error_card_code_generate,error_update_card,error_user_not_found
+from data.db_modules.db_answer import (
+    error_cards_get,
+    error_access,
+    error_card_not_found,
+    error_card_code_generate,
+    error_update_card,
+    error_user_not_found,
+)
 
 
 def check_card_access(card_id: int, user: User):
@@ -123,8 +130,8 @@ def get_card_query(card_id: int, user: User):
                 session = session_create
                 card_get = session.execute(
                     select(
-                        Cards.id, Cards.name, Cards.about,Cards.code,Cards.code_type
-                    ).where(Cards.id==card_id)
+                        Cards.id, Cards.name, Cards.about, Cards.code, Cards.code_type
+                    ).where(Cards.id == card_id)
                 ).one()
                 card = card_get._mapping
                 result = {
@@ -156,7 +163,7 @@ def add_card_query(name: str, about: str, user: User, code: str, code_type: str)
     try:
         session = session_create
         card_add = Cards(
-            name=name, about=about, own_login=user.login,code=code,code_type=code_type
+            name=name, about=about, own_login=user.login, code=code, code_type=code_type
         )
         session.add(card_add)
         session.commit()
@@ -255,7 +262,9 @@ def update_card_about_query(card_id: int, user: User, about: str):
                     "cod": 201,
                 }
             except Exception as err:
-                logger.error(f"Не удалось обновить инфомацию карты из базы Ошибка {err}")
+                logger.error(
+                    f"Не удалось обновить инфомацию карты из базы Ошибка {err}"
+                )
                 result = error_update_card
             finally:
                 session.close()

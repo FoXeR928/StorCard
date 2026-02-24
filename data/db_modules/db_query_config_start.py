@@ -3,7 +3,8 @@ import json
 import os
 from loguru import logger
 
-configPath="./data/instance"
+from data.db_modules.db_create import configPath
+
 
 def create_config_app_start_query(
     app_port: int = 7000,
@@ -14,6 +15,7 @@ def create_config_app_start_query(
     sql_user: str = None,
     sql_password: str = None,
     db_path: str = "instance",
+    front: bool = True,
 ):
     try:
         data = {
@@ -47,15 +49,14 @@ def create_config_app_start_query(
         session.execute(
             update(Configs).where(Configs.name == "app_port").values(value=app_port)
         )
+        session.execute(
+            update(Configs).where(Configs.name == "front").values(value=front)
+        )
         session.commit()
         session.close()
-        logger.success(
-            f"Port write in base"
-        )
+        logger.success(f"Port and Front status write in base")
     except Exception as err:
-        logger.error(
-            f"Failed write port in base. Error: {err}"
-        )
+        logger.error(f"Failed write port in base. Error: {err}")
         result = {
             "result": False,
             "message": "Failed write port in base.",

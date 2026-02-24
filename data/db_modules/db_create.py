@@ -6,16 +6,7 @@ import bcrypt
 import json
 from loguru import logger
 
-
-def init_confg():
-    try:
-        with open("./data/instance/config.json", "r") as file_config:
-            config = json.load(file_config)
-        logger.info("Config file init")
-        return config
-    except Exception as err:
-        logger.critical(f"Config file init failed. Error: {err}")
-        exit()
+from data.config_modules.config_init import init_confg
 
 
 def init_db():
@@ -106,8 +97,8 @@ class Cards(Base):
         ForeignKey(Users.login, onupdate="CASCADE", ondelete="CASCADE"), nullable=False
     )
     image: Mapped[str] = mapped_column(BLOB, nullable=True)
-    code: Mapped[str]=mapped_column(nullable=False)
-    code_type:Mapped[str]=mapped_column(nullable=False)
+    code: Mapped[str] = mapped_column(nullable=False)
+    code_type: Mapped[str] = mapped_column(nullable=False)
     date_create: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), default=datetime.now()
     )

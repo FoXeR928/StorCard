@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from datetime import datetime, timedelta,timezone
+from datetime import datetime, timedelta, timezone
 import jwt
 from loguru import logger
 
@@ -9,18 +9,17 @@ from data.db_modules.db_query_config import get_config
 
 from network.api.api_answer import error_fail_auth
 
+
 def create_token(data: dict, expires_use: bool):
     try:
         expire = datetime.now(timezone.utc)
         if expires_use == True:
-            expire += timedelta(days=7)
+            expire += timedelta(seconds=int(get_config("long_token")))
         else:
-            expire += timedelta(minutes=30)
+            expire += timedelta(seconds=int(get_config("short_token")))
         data["exp"] = int(expire.timestamp())
         encoded_jwt = jwt.encode(
-            payload=data, 
-            key=get_config(name="skey"), 
-            algorithm="HS256"
+            payload=data, key=get_config(name="skey"), algorithm="HS256"
         )
         result = encoded_jwt
         logger.debug(f"Токен создан для пользователя {data['sub']}")
@@ -31,9 +30,11 @@ def create_token(data: dict, expires_use: bool):
 
 
 def decode_token(token: str):
-    if token!=None:
+    if token != None:
         try:
-            payload = jwt.decode(jwt=token, key=get_config(name="skey"), algorithms="HS256",leeway=10)
+            payload = jwt.decode(
+                jwt=token, key=get_config(name="skey"), algorithms="HS256", leeway=10
+            )
             user = payload.get("sub")
         except jwt.ExpiredSignatureError:
             logger.debug("Signature has expired")
@@ -42,7 +43,7 @@ def decode_token(token: str):
             logger.error(f"Ошибка сервера чтения токена: {err}")
             user = None
     else:
-        user=None
+        user = None
     return user
 
 
@@ -68,7 +69,7 @@ def get_current_user_query(login: str):
     return result
 
 
-def auth_query(login: str, password: str, tokenTime:bool):
+def auth_query(login: str, password: str, tokenTime: bool):
     if check_user(login=login) == True:
         session = session_create
         try:
@@ -82,7 +83,7 @@ def auth_query(login: str, password: str, tokenTime:bool):
         finally:
             session.close()
         if check_auth == True:
-            token = create_token(data={"sub": login},expires_use=tokenTime)
+            token = create_token(data={"sub": login}, expires_use=tokenTime)
             if token != False:
                 result = {
                     "result": True,
