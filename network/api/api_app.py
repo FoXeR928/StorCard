@@ -35,6 +35,11 @@ def init_pages():
             from network.api.api_config_start import config_start_app
             from network.web.start_pages import start_pages_app
 
+            app.mount(
+                    "/static",
+                    StaticFiles(directory="network/public/static"),
+                    name="front",
+                )
             app.include_router(router=config_start_app)
             app.include_router(router=start_pages_app)
         logger.debug("Инициализирован API")

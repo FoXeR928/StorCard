@@ -1,9 +1,7 @@
 from sqlalchemy import update
-import json
-import os
 from loguru import logger
 
-from data.db_modules.db_create import configPath
+from data.config_modules.config_check import config_create
 
 
 def create_config_app_start_query(
@@ -27,10 +25,7 @@ def create_config_app_start_query(
             "sql_password": sql_password,
             "db_path": db_path,
         }
-        if os.path.exists(configPath) == False:
-            os.mkdir("")
-        with open(f"{configPath}/config.json", "w") as file_config:
-            json.dump(data, file_config, indent=4)
+        config_create(data=data)
         result = {
             "result": True,
             "message": "Config file create",

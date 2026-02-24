@@ -42,7 +42,7 @@ async def start_configs_app_api(
         sql_user=configs_start_app.sql_user,
         sql_password=configs_start_app.sql_password,
         db_path=configs_start_app.db_path,
-        front=config_start_app.front,
+        front=configs_start_app.front,
     )
     response.status_code = result["cod"]
     if result["result"] == True:

@@ -1,5 +1,5 @@
+from sys import stdout
 from loguru import logger
-
 
 def init_log(log_level_file="INFO", log_level_std="WARNING"):
     try:

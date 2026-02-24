@@ -1,5 +1,6 @@
 import os
 import datetime
+from loguru import logger
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
@@ -42,7 +43,7 @@ def init_ssl(cert_file: str = "ssl.pem", key_file: str = "key.pem"):
             )
             if check_folder_path(config_folder_path):
                 if check_folder_path(cert_folder_path):
-                    with open(f"{configPath}/cert/{key_file}", "wb") as f:
+                    with open(f"{cert_folder_path}/{key_file}", "wb") as f:
                         f.write(
                             keyFileGenerate.private_bytes(
                                 encoding=serialization.Encoding.PEM,
@@ -51,7 +52,7 @@ def init_ssl(cert_file: str = "ssl.pem", key_file: str = "key.pem"):
                             )
                         )
                     logger.success("File certificate key create")
-                    with open(f"{configPath}/cert/{cert_file}", "wb") as f:
+                    with open(f"{cert_folder_path}/{cert_file}", "wb") as f:
                         f.write(cert.public_bytes(serialization.Encoding.PEM))
                     logger.success("File certificate create")
         except Exception as err:
