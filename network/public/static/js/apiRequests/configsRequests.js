@@ -26,6 +26,8 @@ function get_configs(){
                             checked_element="checked"
                         }
                         input_element="<input type='checkbox' class='input_value  -separete_main -input_separete' id='"+config.name+"' "+checked_element+"></input>"
+                    }else if (config.input_format=="generate"){
+                        input_element="<input type='text' readonly class='input_value  -separete_main -input_separete' id='"+config.name+"' value="+config.value+"></input>"
                     }else{
                         input_element="<input type="+config.input_format+" class='input_value  -separete_main -input_separete' id='"+config.name+"' value="+config.value+"></input>"
                     }

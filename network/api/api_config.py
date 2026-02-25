@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Response, Depends, BackgroundTasks
 from pydantic import BaseModel
 from typing import Any
 from loguru import logger
 
+from data.config_modules.os_module import reboot_server
 from network.api.api_auth import User, get_current_user
 from data.db_modules.db_query_config import (
     get_configs_query,
@@ -39,10 +40,13 @@ async def update_config_app_api(
     config_data: ConfigUpdate,
     response: Response,
     current_user: User = Depends(get_current_user),
+    background_task:BackgroundTasks
 ):
     if current_user.is_admin == True:
         result = update_config_query(name=config_data.name, value=config_data.value)
     else:
         result = error_access
     response.status_code = result["cod"]
+    if result["result"]==True:
+        background_task(reboot_server)
     return result

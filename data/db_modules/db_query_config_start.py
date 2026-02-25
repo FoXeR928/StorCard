@@ -26,12 +26,6 @@ def create_config_app_start_query(
             "db_path": db_path,
         }
         config_create(data=data)
-        result = {
-            "result": True,
-            "message": "Config file create",
-            "category": "success",
-            "cod": 200,
-        }
         from data.db_modules.db_create import Configs, session_create
         from data.db_modules.db_create_default import (
             create_default_users,
@@ -50,6 +44,12 @@ def create_config_app_start_query(
         session.commit()
         session.close()
         logger.success(f"Port and Front status write in base")
+        result = {
+            "result": True,
+            "message": "Конфинурационный файл и база созданы",
+            "category": "success",
+            "cod": 200,
+        }
     except Exception as err:
         logger.error(f"Failed write port in base. Error: {err}")
         result = {

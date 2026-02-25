@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional
 from loguru import logger
-import os
-import sys
 
+from data.config_modules.os_module import reboot_server
 from data.db_modules.db_query_config_start import create_config_app_start_query
 
 try:
@@ -32,6 +31,7 @@ class ConfigStartApp(BaseModel):
 async def start_configs_app_api(
     configs_start_app: ConfigStartApp,
     response: Response,
+    background_task: BackgroundTasks
 ):
     result = create_config_app_start_query(
         app_port=configs_start_app.app_port,
@@ -46,9 +46,5 @@ async def start_configs_app_api(
     )
     response.status_code = result["cod"]
     if result["result"] == True:
-        try:
-            logger.info("Server restart")
-            os.execv(sys.executable, [sys.executable] + sys.argv)
-        except Exception as err:
-            logger.error(f"Server not restart. Please, restart it. Error: {err}")
+        background_task(reboot_server)
     return result
