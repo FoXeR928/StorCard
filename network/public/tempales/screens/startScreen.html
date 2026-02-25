@@ -8,37 +8,39 @@
 
 {% block content %}
 <main id="main">
-    <div class="form_with_back -block -centerBlock -start_block">
-        <label for="app_port">Порт приложения</label>
-        <input required id="app_port" class="port -input" type="number" value="7000">
-        <div class="check_box">
-            <label for="front_enable">Включить веб-интерфейс</label>
-            <input id="front_enable" class="front_enable -input" type="checkbox" checked>
-        </div>
-        <select onchange="select_driver()" id="sql_driver"class="select_driver -input">
-            <option value="" selected disabled hidden>Выберите драйвер SQL</option>
-            <option value="sqlite">SQLite</option>
-            <option value="mysql">MySQL</option>
-            <option value="postgresql">PostgreSQL</option>
-        </select>
-        <label for="sql_host" class="sql_host -hide -server">Хост SQL</label>
-        <input id="sql_host" class="sql_host -input -hide -server" type="text">
-        <label for="sql_port" class="sql_port -hide -server">Порт SQL</label>
-        <input id="sql_port" class="sql_port -input -hide -server" type="number">
-        <label for="sql_db" class="sql_db -hide -server -local">Имя базы данных SQL</label>
-        <input required id="sql_db" class="sql_db -input -hide -server -local" type="text" value="storcards_db">
-        <label for="sql_user" class="sql_user -hide -server">Пользователь SQL</label>
-        <input id="sql_user"class="sql_user -input -hide -server" type="text">
-        <label for="sql_password" class="sql_password -hide -server">Пароль SQL</label>
-        <div class="hide-block -input -hide -server">
-            <div class="password-block">
-                <input id="sql_password" class="sql_password -password" type="password">
-                <div id="password-show" class="password-control"></div>
+    <div class="main_container">
+        <div class="form_with_back -block -centerBlock -start_block">
+            <label for="app_port">Порт приложения</label>
+            <input required id="app_port" class="port -input" type="number" value="7000">
+            <div class="check_box">
+                <label for="front_enable">Включить веб-интерфейс</label>
+                <input id="front_enable" class="front_enable -input" type="checkbox" checked>
             </div>
+            <select onchange="select_driver()" id="sql_driver"class="select_driver -input">
+                <option value="" selected disabled hidden>Выберите драйвер SQL</option>
+                <option value="sqlite">SQLite</option>
+                <option value="mysql">MySQL</option>
+                <option value="postgresql">PostgreSQL</option>
+            </select>
+            <label for="sql_host" class="sql_host -hide -server">Хост SQL</label>
+            <input id="sql_host" class="sql_host -input -hide -server" type="text">
+            <label for="sql_port" class="sql_port -hide -server">Порт SQL</label>
+            <input id="sql_port" class="sql_port -input -hide -server" type="number">
+            <label for="sql_db" class="sql_db -hide -server -local">Имя базы данных SQL</label>
+            <input required id="sql_db" class="sql_db -input -hide -server -local" type="text" value="storcards_db">
+            <label for="sql_user" class="sql_user -hide -server">Пользователь SQL</label>
+            <input id="sql_user"class="sql_user -input -hide -server" type="text">
+            <label for="sql_password" class="sql_password -hide -server">Пароль SQL</label>
+            <div class="hide-block -input -hide -server">
+                <div class="password-block">
+                    <input id="sql_password" class="sql_password -password" type="password">
+                    <div id="password-show" class="password-control"></div>
+                </div>
+            </div>
+            <label for="db_path" class="db_path -hide -local">Путь базы данных</label>
+            <input id="db_path" class="db_path -input -hide -local" readonly type="text" value="./instance">
+            <button id="send_settings" onclick="start_config_create()" class="button_send -button_back">Сохранить</button>
         </div>
-        <label for="db_path" class="db_path -hide -local">Путь базы данных</label>
-        <input id="db_path" class="db_path -input -hide -local" readonly type="text" value="./instance">
-        <button id="send_settings" onclick="start_config_create()" class="button_send -button_back">Сохранить</button>
     </div>
 </main>
 {% endblock %}

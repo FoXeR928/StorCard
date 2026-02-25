@@ -35,6 +35,9 @@ function start_config_create(e){
             data:JSON.stringify(db_data),
             success : function(result) {
                 create_flash(flash_status=result["category"],message=result["message"])
+                setTimeout(function(){
+                    location.reload();
+                }, 5000);
             },
             error: function(error){
                 console.log(error);

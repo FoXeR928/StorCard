@@ -46,5 +46,5 @@ async def start_configs_app_api(
     )
     response.status_code = result["cod"]
     if result["result"] == True:
-        background_task(reboot_server)
+        background_task.add_task(reboot_server)
     return result

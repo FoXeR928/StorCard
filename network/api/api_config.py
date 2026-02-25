@@ -39,8 +39,8 @@ async def get_configs_app_api(
 async def update_config_app_api(
     config_data: ConfigUpdate,
     response: Response,
+    background_task: BackgroundTasks,
     current_user: User = Depends(get_current_user),
-    background_task:BackgroundTasks
 ):
     if current_user.is_admin == True:
         result = update_config_query(name=config_data.name, value=config_data.value)
@@ -48,5 +48,5 @@ async def update_config_app_api(
         result = error_access
     response.status_code = result["cod"]
     if result["result"]==True:
-        background_task(reboot_server)
+        background_task.add_task(reboot_server)
     return result
