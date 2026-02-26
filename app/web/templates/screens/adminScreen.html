@@ -11,14 +11,12 @@
 {% include "screens/components/hideForms/updateCardForm.html" %}
 {% include "screens/components/hideForms/addUserForm.html" %}
 {% include "screens/components/hideForms/updateUserForm.html" %}
-<main class="main -admin" id="main">
-    <div class="main_container">
-        {% include "screens/components/headerPanel.html" %}
-        {% include "screens/components/adminCards.html" %}
-        {% include "screens/components/adminUsers.html" %}
-        {% include "screens/components/adminConfigs.html" %}
-    </div>
-</main>
+<div class="main_container">
+    {% include "screens/components/headerPanel.html" %}
+    {% include "screens/components/adminCards.html" %}
+    {% include "screens/components/adminUsers.html" %}
+    {% include "screens/components/adminConfigs.html" %}
+</div>
 {% endblock %}
 {% block scripts %}
 <script src="/static/js/webEffects/formsVisible.js"></script>

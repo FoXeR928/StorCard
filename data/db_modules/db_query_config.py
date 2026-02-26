@@ -6,8 +6,7 @@ from data.db_modules.db_create import Configs, session_create
 def check_config(name: str) -> bool:
     with session_create() as session:
         try:
-            exists = session.scalar(select(Configs.id).where(Configs.name == name).limit(1))
-            return exists is not None
+            return session.scalar(select(Configs.id).where(Configs.name == name).exists().select())
         except Exception as err:
             logger.error(f"Ошибка при проверке конфига {name}: {err}")
             return False
@@ -15,14 +14,12 @@ def check_config(name: str) -> bool:
 def get_configs_query():
     with session_create() as session:
         try:
-            search_config = session.execute(
+            configs = session.execute(
                 select(Configs.name, Configs.about, Configs.value, Configs.input_format)
-            ).all()
-            configs_list = [row._asdict() for row in search_config]
-            logger.trace("Список всех конфигов получен")
+            ).mappings().all()
             return {
                 "result": True,
-                "configs_ai": configs_list,
+                "configs_ai": configs,
                 "message": "Конфиги получены",
                 "category": "success",
                 "cod": 200,

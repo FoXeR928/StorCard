@@ -41,10 +41,10 @@ class Base(DeclarativeBase):
 
 class TimestampMixin:
     date_create: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), default=datetime.now()
+        DateTime, server_default=func.now(), default=datetime.now()
     )
     date_update: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), onupdate=func.now(), nullable=True
+        DateTime, onupdate=func.now(), nullable=True
     )
 
 
@@ -59,13 +59,13 @@ class Users(Base, TimestampMixin):
     disabled: Mapped[bool] = mapped_column(nullable=False, default=False)
 
     def set_password(self, password: str):
-        generate_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
-        self.password_hash = generate_hash
+        salt=bcrypt.gensalt()
+        self.password_hash = bcrypt.hashpw(password.encode(), salt)
 
-    def check_password(self, password: str):
-        check_password_func = bcrypt.checkpw(password.encode(), self.password_hash)
-        check_active = self.disabled == False
-        return check_password_func and check_active
+    def check_password(self, password: str) -> bool:
+        if self.disabled or not self.password_hash:
+            return False
+        return bcrypt.checkpw(password.encode(), self.password_hash)
 
 
 class Configs(Base, TimestampMixin):
@@ -75,7 +75,7 @@ class Configs(Base, TimestampMixin):
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
     about: Mapped[str] = mapped_column(nullable=False)
     value: Mapped[str] = mapped_column(nullable=False)
-    input_format: Mapped[str] = mapped_column(nullable=False)
+    input_format: Mapped[str] = mapped_column(nullable=False, default="text")
 
     def generate_token(self):
         self.token = secrets.token_hex(64)

@@ -15,7 +15,7 @@ def create_default_users(
     with session_create() as session:
         try:
             if recreate:
-                session.delete(base)
+                session.delete(Users)
                 session.flush()
                 logger.info("Удалены строки таблицы Users")
             exists_admin = session.scalar(
