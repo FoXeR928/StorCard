@@ -11,6 +11,7 @@ from data.config_modules.config_check import check_folder_path
 
 cert_folder_path = f"{config_folder_path}/cert"
 
+
 def init_ssl(cert_file: str = "ssl.pem", key_file: str = "key.pem"):
     if os.path.exists(f"{cert_folder_path}/{cert_file}") == True and os.path.exists(
         f"{cert_folder_path}/{key_file}"

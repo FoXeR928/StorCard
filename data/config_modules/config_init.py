@@ -14,4 +14,3 @@ def init_confg():
     except Exception as err:
         logger.critical(f"Config file init failed. Error: {err}")
         exit()
-

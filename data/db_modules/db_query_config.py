@@ -3,112 +3,87 @@ from loguru import logger
 
 from data.db_modules.db_create import Configs, session_create
 
-
-def check_config(name: str):
-    session = session_create
-    try:
-        config = session.scalars(
-            select(Configs).where(Configs.name == name)
-        ).one_or_none()
-        logger.trace(f"Проверка чата {name} в базе")
-        if config != None:
-            result = True
-        else:
-            result = False
-        logger.debug(f"Проверка чата {name} в базе прошла успешно")
-    except Exception as err:
-        logger.error(f"Не удалось проверить чата {name} Ошибка {err}")
-        result = False
-    finally:
-        session.close()
-    return result
-
+def check_config(name: str) -> bool:
+    with session_create() as session:
+        try:
+            exists = session.scalar(select(Configs.id).where(Configs.name == name).limit(1))
+            return exists is not None
+        except Exception as err:
+            logger.error(f"Ошибка при проверке конфига {name}: {err}")
+            return False
 
 def get_configs_query():
-    session = session_create
-    try:
-        search_config = session.execute(
-            select(Configs.name, Configs.about, Configs.value, Configs.input_format)
-        ).all()
-        search_result = list()
-        for config in search_config:
-            search_result.append(
-                {
-                    "name": config.name,
-                    "about": config.about,
-                    "value": config.value,
-                    "input_format": config.input_format,
-                }
-            )
-        result = {
-            "result": True,
-            "configs_ai": search_result,
-            "message": "Конфиги получены",
-            "category": "success",
-            "cod": 200,
-        }
-        logger.trace(f"Получен список конфигов из базы")
-    except Exception as err:
-        logger.error(f"Не удалось получить список конфигов из базы Ошибка {err}")
-        return {
-            "result": False,
-            "message": "Ошибка сервера не удалось получить конфиги приложения",
-            "category": "error",
-            "cod": 500,
-        }
-    finally:
-        session.close()
-    return result
-
-
-def update_config_query(name: str, value):
-    if check_config(name=name) == True:
-        session = session_create
+    with session_create() as session:
         try:
-            session.execute(
-                update(Configs).where(Configs.name == name).values(value=value)
-            )
-            session.commit()
-            logger.success(f"Обноваление значения конфигова {name} на {value} из базы")
-            result = {
+            search_config = session.execute(
+                select(Configs.name, Configs.about, Configs.value, Configs.input_format)
+            ).all()
+            configs_list = [row._asdict() for row in search_config]
+            logger.trace("Список всех конфигов получен")
+            return {
                 "result": True,
-                "message": "Конфиг обнавлен",
+                "configs_ai": configs_list,
+                "message": "Конфиги получены",
                 "category": "success",
                 "cod": 200,
             }
         except Exception as err:
-            logger.error(f"Не удалось обновить значения конфигова {name} Ошибка {err}")
-            result = {
+            logger.error(f"Ошибка получения списка конфигов: {err}")
+            return {
                 "result": False,
-                "message": "Ошибка сервера конфиг не обнавлен",
+                "message": "Ошибка сервера при получении конфигов",
                 "category": "error",
                 "cod": 500,
             }
-        finally:
-            session.close()
-    else:
-        result = {
-            "result": False,
-            "message": "Не найден конфиг",
-            "category": "warning",
-            "cod": 404,
-        }
-    return result
 
+def update_config_query(name: str, value):
+    with session_create() as session:
+        try:
+            result = session.execute(
+                update(Configs).where(Configs.name == name).values(value=str(value))
+            )
+            session.commit()
+            if result.rowcount == 0:
+                return {
+                    "result": False,
+                    "message": "Конфиг не найден",
+                    "category": "warning",
+                    "cod": 404,
+                }
+
+            logger.success(f"Конфиг {name} обновлен на {value}")
+            return {
+                "result": True,
+                "message": "Конфиг обновлен",
+                "category": "success",
+                "cod": 200,
+            }
+        except Exception as err:
+            session.rollback()
+            logger.error(f"Ошибка обновления конфига {name}: {err}")
+            return {
+                "result": False,
+                "message": "Ошибка сервера при обновлении",
+                "category": "error",
+                "cod": 500,
+            }
 
 def get_config(name: str):
-    session = session_create
-    try:
-        search_config = session.scalars(
-            select(Configs.value).where(Configs.name == name)
-        ).first()
-        result = search_config
-        logger.trace(f"Получено значения конфигова {name} из базы")
-    except Exception as err:
-        logger.error(
-            f"Не удалось получить значения конфигова {name} из базы Ошибка {err}"
-        )
-        result = None
-    finally:
-        session.close()
-    return result
+    with session_create() as session:
+        try:
+            value = session.scalar(select(Configs.value).where(Configs.name == name))
+            logger.trace(f"Получено значение конфига {name}")
+            return value
+        except Exception as err:
+            logger.error(f"Ошибка получения конфига {name}: {err}")
+            return None
+
+def get_all_configs():
+    with session_create() as session:
+        try:
+            rows = session.execute(select(Configs.name, Configs.value)).all()
+            logger.trace("Все конфиги загружены для старта")
+            return {row.name: row.value for row in rows}
+        except Exception as err:
+            logger.error(f"Ошибка загрузки всех конфигов: {err}")
+            return {}

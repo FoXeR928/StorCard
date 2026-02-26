@@ -6,13 +6,7 @@ from loguru import logger
 from data.config_modules.os_module import reboot_server
 from data.db_modules.db_query_config_start import create_config_app_start_query
 
-try:
-    config_start_app = APIRouter(
-        prefix="/config/app/start", tags=["Стартовая страница"]
-    )
-    logger.debug("Инициализирован API стартовый")
-except Exception as err:
-    logger.error(f"Ошибка инициализации API: {err}")
+config_start_app = APIRouter(prefix="/config/app/start", tags=["Стартовая страница"])
 
 
 class ConfigStartApp(BaseModel):
@@ -29,22 +23,13 @@ class ConfigStartApp(BaseModel):
 
 @config_start_app.post("/create", summary="Создание установочных конфигов приложения")
 async def start_configs_app_api(
-    configs_start_app: ConfigStartApp,
+    configs: ConfigStartApp,
     response: Response,
-    background_task: BackgroundTasks
+    background_task: BackgroundTasks,
 ):
-    result = create_config_app_start_query(
-        app_port=configs_start_app.app_port,
-        sql_driver=configs_start_app.sql_driver,
-        sql_host=configs_start_app.sql_host,
-        sql_port=configs_start_app.sql_port,
-        sql_db=configs_start_app.sql_db,
-        sql_user=configs_start_app.sql_user,
-        sql_password=configs_start_app.sql_password,
-        db_path=configs_start_app.db_path,
-        front=configs_start_app.front,
-    )
+    result = create_config_app_start_query(**configs.model_dump())
     response.status_code = result["cod"]
     if result["result"] == True:
-        background_task.add_task(reboot_server)
+        background_task.add_task(reboot_server, deplay=2)
+        logger.info("Задача перезагрузки сервера добавлена в очередь")
     return result
