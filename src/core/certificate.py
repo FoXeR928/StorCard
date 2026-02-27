@@ -1,5 +1,6 @@
 import os
 import datetime
+import sys
 from loguru import logger
 from cryptography import x509
 from cryptography.x509.oid import NameOID
@@ -9,7 +10,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from data.config_modules.config_init import config_folder_path
 from data.config_modules.config_check import check_folder_path
 
-cert_folder_path = f"{config_folder_path}/cert"
+CERTIFICATE_DIR = f"{config_folder_path}/cert"
 
 
 def init_ssl(cert_file: str = "ssl.pem", key_file: str = "key.pem"):
@@ -57,4 +58,4 @@ def init_ssl(cert_file: str = "ssl.pem", key_file: str = "key.pem"):
                     logger.success("File certificate create")
         except Exception as err:
             logger.critical(f"Certificate not create. Error: {err}")
-            exit()
+            sys.exit(1)

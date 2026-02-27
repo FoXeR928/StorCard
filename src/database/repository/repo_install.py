@@ -10,7 +10,7 @@ from data.db_modules.db_create_default import (
 )
 
 
-def create_config_app_start_query(**kwargs):
+def install_db(**kwargs):
     app_port = kwargs.pop("app_port", 7000)
     front = kwargs.pop("front", True)
     config_create(data=kwargs)

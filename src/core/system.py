@@ -2,7 +2,6 @@ from loguru import logger
 import os
 import sys
 
-
 def reboot_server(delay: int = 1):
     try:
         if delay:

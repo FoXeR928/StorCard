@@ -1,0 +1,6 @@
+DATA_DIR = "./data"
+CONFIG_FILE = "./instance/config.json"
+CERTIFICATE_DIR = f"{config_folder_path}/certificate"
+TEMPLATE_DIR =  "src/web/template"
+STATIC_DIR "src/web/static"
+PROJECT_PATH =  "pyproject.toml"

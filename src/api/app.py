@@ -16,12 +16,13 @@ from network.web.admin_pages import admin_pages_app
 from network.web.auth_pages import auth_pages_app
 from data.db_modules.db_query_config import get_config
 
-STATIC_DIR =  "network/public/static"
-CONFIG_PATH =  "pyproject.toml"
+TEMPLATE_DIR =  "src/web/template"
+STATIC_DIR "src/web/static"
+PROJECT_PATH =  "pyproject.toml"
 
 def load_app_metadata():
     try:
-        with open(CONFIG_PATH, "rb") as f:
+        with open(PROJECT_PATH, "rb") as f:
             data = tomllib.load(f).get("project", {})
         return data.get("name", "StorCard"), data.get("version", "0.1.0")
     except Exception as e:

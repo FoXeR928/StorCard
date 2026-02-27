@@ -1,6 +1,7 @@
 from sqlalchemy import select, delete, func
 from loguru import logger
 import secrets
+import sys
 
 from data.db_modules.db_create import Users, Configs, session_create
 
@@ -79,4 +80,4 @@ def create_default_config(recreate: bool = False, **kwargs):
         except Exception as err:
             session.rollback()
             logger.error(f"Критическая ошибка при настройке конфигов: {err}")
-            exit()
+            sys.exit(1)
