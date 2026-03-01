@@ -48,5 +48,5 @@ async def update_config_app_api(
         result = error_access
     response.status_code = result["cod"]
     if result["result"] == True:
-        background_task.add_task(reboot_server,delay=2)
+        background_task.add_task(reboot_server, delay=2)
     return result

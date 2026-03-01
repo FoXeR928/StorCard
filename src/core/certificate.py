@@ -1,61 +1,54 @@
-import os
 import datetime
-import sys
+from datetime import datetime, timedelta, timezone
+from typing import Tuple
 from loguru import logger
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from src.core.constants import CERTIFICATE_DIR
+import src.core.system as system
 
-from data.config_modules.config_init import config_folder_path
-from data.config_modules.config_check import check_folder_path
 
-CERTIFICATE_DIR = f"{config_folder_path}/cert"
+def generate_self_signed_cert(
+    days: int = 365, common_name: str = "localhost"
+) -> Tuple[rsa.RSAPrivateKey, x509.Certificate]:
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, common_name)])
+    now = datetime.now(timezone.utc)
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(subject)
+        .issuer_name(issuer)
+        .public_key(private_key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now)
+        .not_valid_after(now + timedelta(days=days))
+        .add_extension(
+            x509.SubjectAlternativeName([x509.DNSName(common_name)]), critical=False
+        )
+        .sign(private_key, hashes.SHA256())
+    )
+    return private_key, cert
 
 
 def init_ssl(cert_file: str = "ssl.pem", key_file: str = "key.pem"):
-    if os.path.exists(f"{cert_folder_path}/{cert_file}") == True and os.path.exists(
-        f"{cert_folder_path}/{key_file}"
-    ):
-        logger.info("Certificate found")
-    else:
-        try:
-            keyFileGenerate = rsa.generate_private_key(
-                public_exponent=65537, key_size=2048
+    cert_path = CERTIFICATE_DIR / cert_file
+    key_path = CERTIFICATE_DIR / key_file
+    if cert_path.exists() and key_path.exists():
+        logger.info("SSL сертификат найден")
+        return
+    try:
+        cert_path.parent.mkdir(parents=True, exist_ok=True)
+        private_key, cert = generate_self_signed_cert(days=365)
+        key_path.write_bytes(
+            private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption(),
             )
-            subject = x509.Name(
-                [
-                    x509.NameAttribute(NameOID.COMMON_NAME, "localhost"),
-                ]
-            )
-            cert = (
-                x509.CertificateBuilder()
-                .subject_name(subject)
-                .issuer_name(subject)
-                .public_key(keyFileGenerate.public_key())
-                .serial_number(x509.random_serial_number())
-                .not_valid_before(datetime.datetime.now())
-                .not_valid_after(datetime.datetime.now() + datetime.timedelta(days=365))
-                .add_extension(
-                    x509.SubjectAlternativeName([x509.DNSName("localhost")]),
-                    critical=False,
-                )
-                .sign(keyFileGenerate, hashes.SHA256())
-            )
-            if check_folder_path(config_folder_path):
-                if check_folder_path(cert_folder_path):
-                    with open(f"{cert_folder_path}/{key_file}", "wb") as f:
-                        f.write(
-                            keyFileGenerate.private_bytes(
-                                encoding=serialization.Encoding.PEM,
-                                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                                encryption_algorithm=serialization.NoEncryption(),
-                            )
-                        )
-                    logger.success("File certificate key create")
-                    with open(f"{cert_folder_path}/{cert_file}", "wb") as f:
-                        f.write(cert.public_bytes(serialization.Encoding.PEM))
-                    logger.success("File certificate create")
-        except Exception as err:
-            logger.critical(f"Certificate not create. Error: {err}")
-            sys.exit(1)
+        )
+        cert_path.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
+    except Exception as err:
+        logger.critical(f"Ошибка генерации SSL: {err}")
+        system.stop_server(1)

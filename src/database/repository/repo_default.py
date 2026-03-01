@@ -1,37 +1,31 @@
 from sqlalchemy import select, delete, func
 from loguru import logger
 import secrets
-import sys
+import src.database.engine as engine
+from src.database.models.model_users import Users
+from src.database.models.model_configs import Configs
+import src.core.system as system
 
-from data.db_modules.db_create import Users, Configs, session_create
 
-
-def create_default_users(
-    recreate: bool = False,
-    admin_login: str = "admin",
-    admin_password: str = "admin",
-    admin_name: str = "админ",
-    is_admin: bool = True,
-):
-    with session_create() as session:
+def create_default_users(recreate: bool = False, **kwargs):
+    login = kwargs.get("admin_login", "admin")
+    with engine.SessionLocal() as session:
         try:
             if recreate:
-                session.delete(Users)
-                session.flush()
-                logger.info("Удалены строки таблицы Users")
-            exists_admin = session.scalar(
-                select(Users).where(Users.is_admin == True).limit(1)
-            )
+                session.execute(delete(Users))
+                logger.warning("Таблица Users очищена")
+            exists_admin = session.scalar(select(Users).where(Users.is_admin == True))
             logger.trace("Проверенно существование записей в базе Users")
             if not exists_admin:
                 admin = Users(
-                    login=admin_login, user_name=admin_name, is_admin=is_admin
+                    login=login,
+                    user_name=kwargs.get("admin_name", "админ"),
+                    is_admin=True,
                 )
-                admin.set_password(admin_password)
+                admin.set_password(kwargs.get("admin_password", "admin"))
                 session.add(admin)
                 session.commit()
-                logger.success(f"Создан пользователь {admin_login} в базе Users")
-            logger.trace("База пользователей настроена")
+                logger.success(f"Создан дефолтный админ: {login}")
         except Exception as err:
             session.rollback()
             logger.error(f"Критическая ошибка при настройке пользователей : {err}")
@@ -42,7 +36,11 @@ def create_default_config(recreate: bool = False, **kwargs):
         "app_port": ("Порт приложения", kwargs.get("app_port", 7000), "number"),
         "skey": ("Ключ OAuth2", kwargs.get("token", secrets.token_hex(64)), "generate"),
         "debug": ("Подробное логирование", str(kwargs.get("debug", False)), "boolean"),
-        "front": ("Наличие web интерфейса", str(kwargs.get("front", True)), "boolean"),
+        "front_status": (
+            "Наличие web интерфейса",
+            str(kwargs.get("front", True)),
+            "boolean",
+        ),
         "cert": ("Файл сертификат", kwargs.get("cert", "ssl.pem"), "file"),
         "cert_key": (
             "Файл ключ сертификата",
@@ -60,24 +58,23 @@ def create_default_config(recreate: bool = False, **kwargs):
             "number",
         ),
     }
-    with session_create() as session:
+    with engine.SessionLocal() as session:
         try:
             if recreate:
-                session.delete(Configs)
-                session.flush()
-                logger.info("Удалены строки таблицы Configs")
+                session.execute(delete(Configs))
+                logger.warning("Таблица Configs очищена")
             existing_configs = session.scalars(select(Configs.name)).all()
-            to_add = [
+            new_configs = [
                 Configs(name=k, about=v[0], value=str(v[1]), input_format=v[2])
                 for k, v in defaults.items()
                 if k not in existing_configs
             ]
-            if to_add:
-                session.add_all(to_add)
+            if new_configs:
+                session.add_all(new_configs)
                 session.commit()
-                logger.success(f"Добавлено новых конфигов: {len(to_add)}")
+                logger.success(f"Добавлено настроек: {len(new_configs)}")
             logger.trace("База конфигов настроена")
         except Exception as err:
             session.rollback()
-            logger.error(f"Критическая ошибка при настройке конфигов: {err}")
-            sys.exit(1)
+            logger.critical(f"Критическая ошибка при настройке конфигов: {err}")
+            system.stop_server(1)

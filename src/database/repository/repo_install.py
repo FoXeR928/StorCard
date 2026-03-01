@@ -1,49 +1,34 @@
 from sqlalchemy import update, case
 from loguru import logger
-
-from data.config_modules.config_check import config_create
-from data.db_modules.db_create import init_db
-from data.db_modules.db_create import Configs, session_create
-from data.db_modules.db_create_default import (
+import src.core.config as config
+import src.database.engine as engine
+from src.database.repository.repo_default import (
     create_default_users,
     create_default_config,
 )
+from src.database.models.model_configs import Configs
+from src.core.responses import api_response
 
 
 def install_db(**kwargs):
     app_port = kwargs.pop("app_port", 7000)
-    front = kwargs.pop("front", True)
-    config_create(data=kwargs)
-    init_db()
+    front_status = kwargs.pop("front", True)
+    config.config_create(data=kwargs)
+    engine.init_db()
     create_default_users()
     create_default_config()
-    try:
-        with session_create() as session:
-            query = (
-                update(Configs)
-                .where(Configs.name == "app_port")
-                .values(
-                    value=case(
-                        (Configs.name == "app_port", str(app_port)),
-                        (Configs.name == "front", str(app_port)),
-                    )
+    settings = {"app_port": app_port, "front_status": front_status}
+    with engine.SessionLocal() as session:
+        try:
+            for name, val in settings.items():
+                session.execute(
+                    update(Configs).where(Configs.name == name).values(value=val)
                 )
-            )
-            session.execute(query)
             session.commit()
-        logger.success(f"Port and Front status write in base")
-        result = {
-            "result": True,
-            "message": "Конфинурационный файл и база созданы",
-            "category": "success",
-            "cod": 200,
-        }
-    except Exception as err:
-        logger.error(f"Failed write port in base. Error: {err}")
-        result = {
-            "result": False,
-            "message": "Failed write port in base.",
-            "category": "error",
-            "cod": 500,
-        }
-    return result
+            logger.success("Конфигурация порта и статуса web интерфейса записаны в БД")
+            return api_response(
+                True, "Конфигурационный файл и база успешно созданы", 201
+            )
+        except Exception as err:
+            logger.error(f"Ошибка записи настроек. Error: {err}")
+            return api_response(False, f"Не удалось записать настройки: {err}", 500)

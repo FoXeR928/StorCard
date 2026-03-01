@@ -2,34 +2,22 @@ from fastapi import APIRouter, Response, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional
 from loguru import logger
+import src.core.system as system
+import src.database.repository.repo_install as repo_install
+from src.api.schemas.schemas_install import InstallSchemas
 
-from data.config_modules.os_module import reboot_server
-from data.db_modules.db_query_config_start import create_config_app_start_query
-
-install_api = APIRouter(prefix="/config/app/start", tags=["Стартовая страница"])
-
-
-class ConfigStartApp(BaseModel):
-    app_port: int = 7000
-    sql_driver: str = "sqlite"
-    sql_host: Optional[str] = None
-    sql_port: Optional[int] = None
-    sql_db: Optional[str] = "storcard_db"
-    sql_user: Optional[str] = None
-    sql_password: Optional[str] = None
-    db_path: Optional[str] = "./instance"
-    front: Optional[bool] = True
+install_api = APIRouter(prefix="", tags=["Установка API"])
 
 
-@install_api.post("/create", summary="Создание установочных конфигов приложения")
-async def install_api(
-    configs: ConfigStartApp,
+@install_api.post("/install", summary="Первичная настройка приложения")
+async def install(
+    configs: InstallSchemas,
     response: Response,
     background_task: BackgroundTasks,
 ):
-    result = create_config_app_start_query(**configs.model_dump())
-    response.status_code = result["cod"]
-    if result["result"] == True:
-        background_task.add_task(reboot_server, deplay=2)
+    result = repo_install.install_db(**configs.model_dump())
+    response.status_code = result.get("code", 201)
+    if result.get("result"):
+        background_task.add_task(system.reboot_server, delay=2)
         logger.info("Задача перезагрузки сервера добавлена в очередь")
     return result

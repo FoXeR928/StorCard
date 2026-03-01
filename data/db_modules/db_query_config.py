@@ -3,20 +3,30 @@ from loguru import logger
 
 from data.db_modules.db_create import Configs, session_create
 
+
 def check_config(name: str) -> bool:
     with session_create() as session:
         try:
-            return session.scalar(select(Configs.id).where(Configs.name == name).exists().select())
+            return session.scalar(
+                select(Configs.id).where(Configs.name == name).exists().select()
+            )
         except Exception as err:
             logger.error(f"Ошибка при проверке конфига {name}: {err}")
             return False
 
+
 def get_configs_query():
     with session_create() as session:
         try:
-            configs = session.execute(
-                select(Configs.name, Configs.about, Configs.value, Configs.input_format)
-            ).mappings().all()
+            configs = (
+                session.execute(
+                    select(
+                        Configs.name, Configs.about, Configs.value, Configs.input_format
+                    )
+                )
+                .mappings()
+                .all()
+            )
             return {
                 "result": True,
                 "configs_ai": configs,
@@ -32,6 +42,7 @@ def get_configs_query():
                 "category": "error",
                 "cod": 500,
             }
+
 
 def update_config_query(name: str, value):
     with session_create() as session:
@@ -65,6 +76,7 @@ def update_config_query(name: str, value):
                 "cod": 500,
             }
 
+
 def get_config(name: str):
     with session_create() as session:
         try:
@@ -74,6 +86,7 @@ def get_config(name: str):
         except Exception as err:
             logger.error(f"Ошибка получения конфига {name}: {err}")
             return None
+
 
 def get_all_configs():
     with session_create() as session:
