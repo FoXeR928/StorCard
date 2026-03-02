@@ -26,7 +26,7 @@ def test_create_users_first_run(db_session):
 
 
 def test_create_users_already_exists(db_session):
-    db_session.add(Users(login="existing", is_admin=True))
+    db_session.add(Users(login="existing", is_admin=True, password_hash=b"dummy_hash"))
     db_session.commit()
 
     create_default_users(admin_login="new_admin")
@@ -37,7 +37,7 @@ def test_create_users_already_exists(db_session):
 
 
 def test_create_users_recreate(db_session):
-    db_session.add(Users(login="old_user", is_admin=False))
+    db_session.add(Users(login="old_user", is_admin=False, password_hash=b"dummy_hash"))
     db_session.commit()
 
     create_default_users(recreate=True, admin_login="new_admin")

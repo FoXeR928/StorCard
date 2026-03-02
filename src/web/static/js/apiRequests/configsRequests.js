@@ -1,6 +1,6 @@
 function get_configs(){
     $.ajax({
-        url:'/configs/app/get',
+        url:'/configs/get',
         method:'GET',
         headers:{
             "Content-Type":"application/json",

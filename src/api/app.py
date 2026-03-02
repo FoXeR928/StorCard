@@ -1,5 +1,4 @@
 import tomllib
-from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -29,17 +28,26 @@ def setup_routes(app: FastAPI):
         config_exists = config.check_config()
 
         if config_exists:
-            app.include_router(auth_app)
-            app.include_router(config_app)
-            app.include_router(users_app)
-            app.include_router(cards_app)
+            from src.api.v1.api_auth import auth_api
+            from src.api.v1.api_config import config_api
+            from src.api.v1.api_users import users_api
 
-            if get_config("front"):
+            app.include_router(auth_api)
+            app.include_router(config_api)
+            app.include_router(users_api)
+            #app.include_router(cards_api)
+
+            from src.database.repository.repo_config import get_config_val
+
+            if bool(int(get_config_val("front_status"))):
+                from src.web.routes.route_auth import auth_route
+                from src.web.routes.route_admin import admin_route
+
                 app.mount(
                     "/static", StaticFiles(directory=str(STATIC_DIR)), name="static"
                 )
-                app.include_router(admin_pages_app)
-                app.include_router(auth_pages_app)
+                app.include_router(auth_route)
+                app.include_router(admin_route)
                 logger.info("Web-интерфейс инициализирован")
         else:
             from src.api.v1.api_install import install_api

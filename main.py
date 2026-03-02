@@ -15,11 +15,12 @@ from src.database.repository.repo_default import (
 def start_app():
     log_level = "INFO"
     if config.check_config():
+        from src.database.repository.repo_config import get_all_configs_dict
         try:
             engine.init_db()
             create_default_config()
             create_default_users()
-            conf = get_all_configs()
+            conf = get_all_configs_dict()
             port = int(conf.get("app_port", 7000))
             cert_file = conf.get("cert", "ssl.pem")
             key_file = conf.get("cert_key", "key.pem")

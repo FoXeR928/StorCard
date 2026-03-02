@@ -12,7 +12,7 @@ def get_user_by_login(login: str):
             select(Users.login, Users.user_name, Users.is_admin).where(
                 Users.login == login
             )
-        ).one_or_none()
+        ).mappings().one_or_none()
 
 
 def authenticate_user(login: str, password: str, long_session: bool):

@@ -49,7 +49,7 @@ def create_default_config(recreate: bool = False, **kwargs):
         ),
         "short_token": (
             "Короткий токен (сек)",
-            str(kwargs.get("short_token", 1800)),
+            str(kwargs.get("short_token", 3600)),
             "number",
         ),
         "long_token": (
