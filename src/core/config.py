@@ -23,7 +23,7 @@ def get_db_config() -> Dict[str, Any]:
         system.stop_server(1)
 
 
-def config_create(data: Dict[str, Any]) -> None:
+def config_create(data: Dict[str, Any]) -> bool:
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         with tempfile.NamedTemporaryFile(
@@ -33,6 +33,7 @@ def config_create(data: Dict[str, Any]) -> None:
             temp_path = Path(tf.name)
         shutil.move(str(temp_path), str(CONFIG_FILE))
         logger.success(f"Конфигурация создана: {CONFIG_FILE}")
+        return True
     except Exception as err:
         logger.error(f"Не удалось создать конфиг: {err}")
-        raise
+        return False

@@ -47,7 +47,6 @@ def start_app():
             log_level=log_level.lower(),
         )
     except Exception as err:
-        logger.error(f"Критическая ошибка сервера: {err}")
         raise
     finally:
         logger.info("Работа сервера завершена")

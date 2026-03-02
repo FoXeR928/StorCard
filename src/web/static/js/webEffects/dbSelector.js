@@ -1,17 +1,17 @@
+const DRIVER_DEFAULTS = {
+    postgresql: { host: 'localhost', port: 5432 },
+    mysql: { host: 'localhost', port: 3306 }
+};
+
 function select_driver(){
-    select=$("#sql_driver").val()
-    if (select=='sqlite'){
-        $('.-hide').hide()
-        $('.-local').show()
-    }else if (select=='postgresql'){
-        $('.-hide').hide()
-        $('#sql_host').val('localhost')
-        $('#sql_port').val(5432)
-        $('.-server').show()
-    }else if (select=='mysql'){
-        $('.-hide').hide()
-        $('#sql_host').val('localhost')
-        $('#sql_port').val(3306)
-        $('.-server').show()
+    const driver = $("#sql_driver").val();
+    const config = DRIVER_DEFAULTS[driver];
+     $('.-hide').hide();
+    if (driver === 'sqlite') {
+        $('.-local').show();
+    } else if (config) {
+        $('#sql_host').val(config.host);
+        $('#sql_port').val(config.port);
+        $('.-server').show();
     }
 }

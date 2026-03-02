@@ -38,11 +38,11 @@
         </div>
         <label for="db_path" class="db_path -hide -local">Путь базы данных</label>
         <input id="db_path" class="db_path -input -hide -local" readonly type="text" value="./data">
-        <button id="send_settings" onclick="start_config_create()" class="button_send -button_back">Сохранить</button>
+        <button id="send_settings" onclick="install_request()" class="button_send -button_back">Сохранить</button>
     </div>
 </div>
 {% endblock %}
 {% block scripts %}
 <script src="/static/js/webEffects/dbSelector.js"></script>
-<script src="/static/js/apiRequests/configCreate.js"></script>
+<script src="/static/js/apiRequests/installRequest.js"></script>
 {% endblock %}

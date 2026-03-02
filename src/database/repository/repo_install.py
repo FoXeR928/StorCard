@@ -7,13 +7,16 @@ from src.database.repository.repo_default import (
     create_default_config,
 )
 from src.database.models.model_configs import Configs
-from src.core.responses import api_response
+from src.core.responses import api_response, error_500
 
 
 def install_db(**kwargs):
     app_port = kwargs.pop("app_port", 7000)
     front_status = kwargs.pop("front", True)
-    config.config_create(data=kwargs)
+    if not config.config_create(data=kwargs):
+        return error_500(
+            "Возникла ошибка при создание конфигурационного файла. Проверьти логи"
+        )
     engine.init_db()
     create_default_users()
     create_default_config()
@@ -31,4 +34,4 @@ def install_db(**kwargs):
             )
         except Exception as err:
             logger.error(f"Ошибка записи настроек. Error: {err}")
-            return api_response(False, f"Не удалось записать настройки: {err}", 500)
+            return error_500(f"Не удалось записать настройки: {err}")

@@ -1,6 +1,5 @@
-function create_flash(flash_status,message){
-    $("#main").prepend("<div class='flash "+flash_status+"'>"+message+"</div>")
-    setTimeout(function(){
-        $('.flash').remove();
-    }, 4000);
+function create_flash(status,message){
+    const $flash = $(`<div class='flash ${status}'>${message}</div>`);
+   $("#main").prepend($flash);
+    setTimeout(() => $flash.fadeOut(() => $flash.remove()), 4000);
 }

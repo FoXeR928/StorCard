@@ -1,10 +1,14 @@
 import tomllib
+from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+import os
+import tomllib
 from loguru import logger
-from src.core.constants import PROJECT_FILE, STATIC_DIR
 import src.core.config as config
+from src.core.constants import PROJECT_FILE, STATIC_DIR
 
 
 def load_app_metadata():
@@ -38,12 +42,12 @@ def setup_routes(app: FastAPI):
                 app.include_router(auth_pages_app)
                 logger.info("Web-интерфейс инициализирован")
         else:
-            import src.api.v1.api_install as api_intall
-            import src.web.routes.route_install as route_install
+            from src.api.v1.api_install import install_api
+            from src.web.routes.route_install import install_route
 
             app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
-            app.include_router(api_intall.install_api)
-            app.include_router(route_install.install_route)
+            app.include_router(install_api)
+            app.include_router(install_route)
             logger.warning("Конфигурация не найдена: запущен мастер настройки")
 
         logger.info("API успешно инициализировано")

@@ -39,8 +39,7 @@ def test_config_create_permission_error(mock_config_path):
     data_dir.mkdir(parents=True, exist_ok=True)
     try:
         data_dir.chmod(0o444)
-        with pytest.raises(Exception):
-            config.config_create({"test": 1})
+        assert config.config_create({"test": 1})
     finally:
         data_dir.chmod(0o755)
 

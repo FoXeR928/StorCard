@@ -28,5 +28,6 @@ def error_500(msg: str = "Ошибка сервера"):
 def error_403(msg: str = "Доступ запрещен"):
     return api_response(False, msg, 403, "warning")
 
+
 def error_401(msg: str = "Авторизация не пройдена"):
     return api_response(False, msg, 401, "warning")
