@@ -3,25 +3,24 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-import os
-import tomllib
 from loguru import logger
 import src.core.config as config
 from src.core.constants import PROJECT_FILE, STATIC_DIR
 
 
-def load_app_metadata():
+def get_app_info():
+    default = {"name": "StorCard", "version": "0.1.0"}
     try:
-        with open(PROJECT_FILE, "rb") as f:
-            data = tomllib.load(f).get("project", {})
-        return data.get("name", "StorCard"), data.get("version", "0.1.0")
+        if PROJECT_FILE.exists():
+            with open(PROJECT_FILE, "rb") as f:
+                data = tomllib.load(f).get("project", {})
+                return data.get("name", default["name"]), data.get("version", default["version"])
     except Exception as e:
-        logger.error(f"Ошибка чтения метаданных: {e}")
-        return "StorCard", "unknown"
+        logger.error(f"Metadata read error: {e}")
+    return default["name"], default["version"]
 
 
-APP_NAME, APP_VERSION = load_app_metadata()
-
+APP_NAME, APP_VERSION = get_app_info()
 
 def setup_routes(app: FastAPI):
     try:
@@ -31,21 +30,18 @@ def setup_routes(app: FastAPI):
             from src.api.v1.api_auth import auth_api
             from src.api.v1.api_config import config_api
             from src.api.v1.api_users import users_api
+            from src.api.v1.api_cards import cards_api
 
             app.include_router(auth_api)
             app.include_router(config_api)
             app.include_router(users_api)
-            #app.include_router(cards_api)
+            app.include_router(cards_api)
 
             from src.database.repository.repo_config import get_config_val
-
-            if bool(int(get_config_val("front_status"))):
+            if str(get_config_val("front_status")) == "1":
                 from src.web.routes.route_auth import auth_route
                 from src.web.routes.route_admin import admin_route
 
-                app.mount(
-                    "/static", StaticFiles(directory=str(STATIC_DIR)), name="static"
-                )
                 app.include_router(auth_route)
                 app.include_router(admin_route)
                 logger.info("Web-интерфейс инициализирован")
@@ -53,7 +49,6 @@ def setup_routes(app: FastAPI):
             from src.api.v1.api_install import install_api
             from src.web.routes.route_install import install_route
 
-            app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
             app.include_router(install_api)
             app.include_router(install_route)
             logger.warning("Конфигурация не найдена: запущен мастер настройки")
@@ -77,6 +72,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 setup_routes(app)
 

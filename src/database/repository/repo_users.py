@@ -7,9 +7,7 @@ from src.database.models.model_users import Users
 import src.database.engine as engine
 
 
-def check_user_opportunity(
-    current_user_login: str, target_login: str
-) -> bool:
+def check_user_opportunity(current_user_login: str, target_login: str) -> bool:
     with engine.SessionLocal() as session:
         data = session.execute(
             select(
@@ -46,14 +44,14 @@ def get_users_query():
         return error_500()
 
 
-def registration_user_query(
-    login: str, user_name: str, password: str
-):
+def registration_user_query(login: str, user_name: str, password: str):
     with engine.SessionLocal() as session:
         try:
             exists = session.scalar(select(func.count()).where(Users.login == login))
             if exists:
-                return api_response(False, "Пользователь уже существует", 409, "warning")
+                return api_response(
+                    False, "Пользователь уже существует", 409, "warning"
+                )
             new_user = Users(login=login, user_name=user_name)
             new_user.set_password(password)
             session.add(new_user)
@@ -66,9 +64,7 @@ def registration_user_query(
             return error_500()
 
 
-def update_password_user_query(
-    requester: Any, login: str, password: str
-):
+def update_password_user_query(requester: Any, login: str, password: str):
     if not (requester.is_admin or requester.login == login):
         return error_403()
     with engine.SessionLocal() as session:
@@ -86,9 +82,7 @@ def update_password_user_query(
             return error_500()
 
 
-def update_role_user_query(
-    requester: Any, login: str, is_admin: bool
-):
+def update_role_user_query(requester: Any, login: str, is_admin: bool):
     if not is_admin and not check_user_opportunity(requester.login, login):
         return error_403("Нельзя лишить прав последнего администратора")
     with engine.SessionLocal() as session:

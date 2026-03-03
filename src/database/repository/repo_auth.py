@@ -8,11 +8,15 @@ from src.core.responses import api_response, error_401, error_500
 
 def get_user_by_login(login: str):
     with engine.SessionLocal() as session:
-        return session.execute(
-            select(Users.login, Users.user_name, Users.is_admin).where(
-                Users.login == login
+        return (
+            session.execute(
+                select(Users.login, Users.user_name, Users.is_admin).where(
+                    Users.login == login
+                )
             )
-        ).mappings().one_or_none()
+            .mappings()
+            .one_or_none()
+        )
 
 
 def authenticate_user(login: str, password: str, long_session: bool):
