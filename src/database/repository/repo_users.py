@@ -64,7 +64,7 @@ def registration_user_query(login: str, user_name: str, password: str):
             return error_500()
 
 
-def update_password_user_query(requester: Any, login: str, password: str):
+def update_password_user_query(requester: Any, login: str, password: str, **kwargs):
     if not (requester.is_admin or requester.login == login):
         return error_403()
     with engine.SessionLocal() as session:
@@ -82,7 +82,7 @@ def update_password_user_query(requester: Any, login: str, password: str):
             return error_500()
 
 
-def update_role_user_query(requester: Any, login: str, is_admin: bool):
+def update_role_user_query(requester: Any, login: str, is_admin: bool,**kwargs):
     if not is_admin and not check_user_opportunity(requester.login, login):
         return error_403("Нельзя лишить прав последнего администратора")
     with engine.SessionLocal() as session:

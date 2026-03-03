@@ -28,7 +28,7 @@ def start_app():
             port = int(conf.get("app_port", 7000))
             cert_file = conf.get("cert", cert_file)
             key_file = conf.get("cert_key", key_file)
-            if str(conf.get("debug")).lower() in ("true", "1"):
+            if conf.get("debug") in ("true", "1"):
                 log_level = "TRACE"
             log.init_log(log_level_std=log_level)
             certificate.init_ssl(cert_file=cert_file, key_file=key_file)

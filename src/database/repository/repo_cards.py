@@ -119,13 +119,13 @@ def add_card_query(name: str, about: str, user, code: str, code_type: str):
             return error_500()
 
 
-def update_card_field(card_id: uuid.UUID, user, **values):
+def update_card_field(id: uuid.UUID, user, **values):
     with engine.SessionLocal() as session:
         try:
             stmt = (
                 update(Cards)
                 .where(
-                    Cards.id == card_id,
+                    Cards.id == id,
                     or_(Cards.own_login == user.login, user.is_admin),
                 )
                 .values(**values, version=Cards.version + 1)
@@ -136,7 +136,7 @@ def update_card_field(card_id: uuid.UUID, user, **values):
 
             if result.rowcount == 0:
                 return error_403("Нет прав или карта не найдена")
-            return api_response(True, "Данные обновлены")
+            return api_response(True, "Данные обновлены",201)
         except Exception as err:
             logger.error(f"Ошибка обновления {values}: {err}")
             return error_500()

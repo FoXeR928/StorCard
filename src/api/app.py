@@ -11,7 +11,7 @@ from src.core.constants import PROJECT_FILE, STATIC_DIR
 def get_app_info():
     default = {"name": "StorCard", "version": "0.1.0"}
     try:
-        if PROJECT_FILE.exists():
+        if Path(PROJECT_FILE).exists():
             with open(PROJECT_FILE, "rb") as f:
                 data = tomllib.load(f).get("project", {})
                 return data.get("name", default["name"]), data.get("version", default["version"])
@@ -73,7 +73,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-if STATIC_DIR.exists():
+if Path(STATIC_DIR).exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 setup_routes(app)

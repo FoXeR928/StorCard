@@ -38,14 +38,14 @@ async def registration_user_api(data: RegistrationUser, _=Depends(admin_required
 async def update_password_user_api(
     data: UpdatePassword, current_user=Depends(get_current_user)
 ):
-    return update_password_user_query(user_update=current_user, **data.model_dump())
+    return update_password_user_query(requester=current_user, **data.model_dump())
 
 
 @users_api.patch("/change/role", summary="Смена роли пользователя")
 async def update_role_user_api(data: UpdateRole, current_user=Depends(admin_required)):
-    return update_role_user_query(user_update=current_user, **data.model_dump())
+    return update_role_user_query(requester=current_user, **data.model_dump())
 
 
 @users_api.delete("/delet", summary="Удаление пользователя")
 async def delet_user_api(login: str, current_user=Depends(admin_required)):
-    return delete_user_query(user_delet=current_user, login=login)
+    return delete_user_query(requester=current_user, login=login)

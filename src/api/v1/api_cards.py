@@ -80,7 +80,7 @@ async def update_about(
 async def update_code(
     res: Response, data: UpdateCardCode, user=Depends(get_current_user)
 ):
-    return send_res(res, update_card_field(**data.dict(), user=user))
+    return send_res(res, update_card_field(**data.model_dump(), user=user))
 
 
 @cards_api.patch("/update/image")
