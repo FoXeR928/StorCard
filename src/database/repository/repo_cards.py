@@ -7,7 +7,8 @@ import src.database.engine as engine
 from src.core.responses import api_response, error_404, error_403, error_500
 
 
-def get_card_query(card_id: uuid.UUID, user):
+def get_card_query(requester, card_id: uuid.UUID):
+    """Получение карты"""
     with engine.SessionLocal() as session:
         stmt = (
             select(Cards)
@@ -15,9 +16,9 @@ def get_card_query(card_id: uuid.UUID, user):
             .where(
                 Cards.id == card_id,
                 or_(
-                    Cards.own_login == user.login,
-                    CardsAccess.user_login == user.login,
-                    user.is_admin == True,
+                    Cards.own_login == requester.login,
+                    CardsAccess.user_login == requester.login,
+                    requester.is_admin == True,
                 ),
             )
         )
@@ -41,7 +42,6 @@ def get_card_query(card_id: uuid.UUID, user):
 
 def add_card_access_query(card_id: uuid.UUID, login: str, user):
     with engine.SessionLocal() as session:
-        # Проверяем, что ТЫ владелец, прежде чем давать доступ другому
         card = session.scalar(
             select(Cards).where(Cards.id == card_id, Cards.own_login == user.login)
         )

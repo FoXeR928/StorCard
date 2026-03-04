@@ -1,5 +1,4 @@
 from sqlalchemy import select, update, delete, func
-from sqlalchemy.orm import Session
 from loguru import logger
 from typing import Any
 from src.core.responses import api_response, error_404, error_500, error_403
@@ -12,32 +11,38 @@ def get_users_query(requester):
         return error_403()
     try:
         with engine.SessionLocal() as session:
-            stmt = select(
-                Users.login,
-                Users.user_name,
-                Users.is_admin,
-                Users.disabled,
-                Users.date_create,
-                Users.date_update,
+            users = (
+                session.execute(
+                    select(
+                        Users.login,
+                        Users.user_name,
+                        Users.is_admin,
+                        Users.disabled,
+                        Users.date_create,
+                        Users.date_update,
+                    )
+                )
+                .mappings()
+                .all()
             )
-            users = session.execute(stmt).mappings().all()
         logger.debug("Список пользователей успешно получен")
-        return api_response(
-            True, "Пользователи получены", users=[dict(u) for u in users]
-        )
+        return api_response(True, "Пользователи получены", users)
     except Exception as err:
         logger.error(f"Ошибка получения пользователей: {err}")
         return error_500()
 
 
 def registration_user_query(
-    requester, login: str, user_name: str, password: str, **values
+    requester,
+    login: str,
+    user_name: str,
+    password: str,
 ):
     if not requester.is_admin:
         return error_403()
     with engine.SessionLocal() as session:
         try:
-            exists = session.scalar(select(func.count()).where(Users.login == login))
+            exists = session.scalar(select(Users).where(Users.login == login))
             if exists:
                 return api_response(
                     False, "Пользователь уже существует", 409, "warning"
@@ -54,7 +59,7 @@ def registration_user_query(
             return error_500()
 
 
-def update_password_user_query(requester: Any, login: str, password: str, **kwargs):
+def update_password_user_query(requester: Any, login: str, password: str):
     if not (requester.is_admin or requester.login == login):
         return error_403()
     with engine.SessionLocal() as session:
@@ -73,17 +78,17 @@ def update_password_user_query(requester: Any, login: str, password: str, **kwar
 
 
 def update_user_query(requester: Any, login: str, **values):
-    if not is_admin and not check_user_opportunity(requester.login, login):
-        return error_403("Нельзя лишить прав последнего администратора")
+    if not (requester.is_admin or requester.login == login):
+        return error_403("Нет прав на изменение")
     with engine.SessionLocal() as session:
         try:
             result = session.execute(
                 update(Users).where(Users.login == login).values(values)
             )
             if result.rowcount == 0:
-                return error_404()
+                return error_404("Пользователь не найден")
             session.commit()
-            return api_response(True, "Роль изменена", 201)
+            return api_response(True, "Информация изменена", 201)
         except Exception as err:
             session.rollback()
             logger.error(f"Ошибка изменения: {err}")
@@ -91,13 +96,13 @@ def update_user_query(requester: Any, login: str, **values):
 
 
 def delete_user_query(requester: Any, login: str):
-    if not check_user_opportunity(requester.login, login):
-        return error_403("Нельзя удалить последнего администратора")
+    if not requester.is_admin:
+        return error_403("Нет права на удаление")
     with engine.SessionLocal() as session:
         try:
             result = session.execute(delete(Users).where(Users.login == login))
             if result.rowcount == 0:
-                return error_404()
+                return error_404("Пользователь не найден")
             session.commit()
             logger.success(f"Пользователь {login} удален")
             return api_response(True, "Пользователь удален", 201)
@@ -105,3 +110,6 @@ def delete_user_query(requester: Any, login: str):
             session.rollback()
             logger.error(f"Ошибка удаления: {err}")
             return error_500()
+
+
+"""Проверено"""

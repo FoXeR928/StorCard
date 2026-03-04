@@ -78,3 +78,6 @@ def create_default_config(recreate: bool = False, **kwargs):
             session.rollback()
             logger.critical(f"Критическая ошибка при настройке конфигов: {err}")
             system.stop_server(1)
+
+
+"""Проверено"""

@@ -3,7 +3,7 @@ from loguru import logger
 from sqlalchemy import select, update
 import src.database.engine as engine
 from src.database.models.model_configs import Configs
-from src.core.responses import api_response
+from src.core.responses import api_response, error_404
 
 
 @lru_cache(maxsize=1)
@@ -23,11 +23,11 @@ def update_config_query(name: str, value: str):
             result = session.execute(
                 update(Configs).where(Configs.name == name).values(value=str(value))
             )
-            if result.rowcount > 0:
-                session.commit()
-                get_all_configs_dict.cache_clear()
-                return api_response(True, f"Конфиг {name} обновлен")
-            return api_response(False, "Конфиг не найден", 404)
+            if result.rowcount == 0:
+                return api_response(False, "Конфиг не найден", 404)
+            session.commit()
+            get_all_configs_dict.cache_clear()
+            return api_response(True, f"Конфиг {name} обновлен")
         except Exception:
             session.rollback()
             return api_response(False, "Ошибка БД", 500)
@@ -51,3 +51,6 @@ def get_configs_list_api():
         except Exception as err:
             logger.error(f"Ошибка получения конфигов: {err}")
             return api_response(False, "Ошибка сервера при чтении настроек", 500)
+
+
+"""Проверено"""
