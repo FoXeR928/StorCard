@@ -14,21 +14,12 @@ class AddCard(BaseModel):
     code_type: str
 
 
-class UpdateCardName(CardBase):
-    name: str
-
-
-class UpdateCardAbout(CardBase):
-    about: str
-
-
-class UpdateCardCode(CardBase):
-    code: str
-    code_type: str
-
-
-class UpdateCardOwn(CardBase):
-    own: str
+class UpdateCard(CardBase):
+    name: Optional[str] = None
+    about: Optional[str] = None
+    code: Optional[str] = None
+    code_type: Optional[str] = None
+    own: Optional[str] = None
 
 
 class AddCardAccess(CardBase):

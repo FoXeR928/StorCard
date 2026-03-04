@@ -14,13 +14,16 @@ def get_app_info():
         if Path(PROJECT_FILE).exists():
             with open(PROJECT_FILE, "rb") as f:
                 data = tomllib.load(f).get("project", {})
-                return data.get("name", default["name"]), data.get("version", default["version"])
+                return data.get("name", default["name"]), data.get(
+                    "version", default["version"]
+                )
     except Exception as e:
         logger.error(f"Metadata read error: {e}")
     return default["name"], default["version"]
 
 
 APP_NAME, APP_VERSION = get_app_info()
+
 
 def setup_routes(app: FastAPI):
     try:
@@ -38,6 +41,7 @@ def setup_routes(app: FastAPI):
             app.include_router(cards_api)
 
             from src.database.repository.repo_config import get_config_val
+
             if str(get_config_val("front_status")) == "1":
                 from src.web.routes.route_auth import auth_route
                 from src.web.routes.route_admin import admin_route

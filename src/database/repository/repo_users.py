@@ -7,23 +7,9 @@ from src.database.models.model_users import Users
 import src.database.engine as engine
 
 
-def check_user_opportunity(current_user_login: str, target_login: str) -> bool:
-    with engine.SessionLocal() as session:
-        data = session.execute(
-            select(
-                Users.is_admin,
-                select(func.count()).where(Users.is_admin == True).scalar_subquery(),
-            ).where(Users.login == target_login)
-        ).first()
-    if not data:
-        return True
-    target_is_admin, total_admins = data
-    if target_is_admin and total_admins <= 1 and current_user_login == target_login:
-        return False
-    return True
-
-
-def get_users_query():
+def get_users_query(requester):
+    if not requester.is_admin:
+        return error_403()
     try:
         with engine.SessionLocal() as session:
             stmt = select(
@@ -44,7 +30,11 @@ def get_users_query():
         return error_500()
 
 
-def registration_user_query(login: str, user_name: str, password: str):
+def registration_user_query(
+    requester, login: str, user_name: str, password: str, **values
+):
+    if not requester.is_admin:
+        return error_403()
     with engine.SessionLocal() as session:
         try:
             exists = session.scalar(select(func.count()).where(Users.login == login))
@@ -82,13 +72,13 @@ def update_password_user_query(requester: Any, login: str, password: str, **kwar
             return error_500()
 
 
-def update_role_user_query(requester: Any, login: str, is_admin: bool,**kwargs):
+def update_user_query(requester: Any, login: str, **values):
     if not is_admin and not check_user_opportunity(requester.login, login):
         return error_403("Нельзя лишить прав последнего администратора")
     with engine.SessionLocal() as session:
         try:
             result = session.execute(
-                update(Users).where(Users.login == login).values(is_admin=is_admin)
+                update(Users).where(Users.login == login).values(values)
             )
             if result.rowcount == 0:
                 return error_404()

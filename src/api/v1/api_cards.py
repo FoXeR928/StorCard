@@ -24,11 +24,6 @@ from src.database.repository.repo_cards import (
 cards_api = APIRouter(prefix="/cards", tags=["Карты"])
 
 
-def send_res(response: Response, result: dict):
-    response.status_code = result.get("code", result.get("cod", 200))
-    return result
-
-
 @cards_api.get("/get", summary="Все карты (только Admin)")
 async def get_all(res: Response, user=Depends(get_current_user)):
     if not user.is_admin:
@@ -58,6 +53,13 @@ async def add_access(
     return send_res(
         res, add_card_access_query(card_id=data.id, login=data.login, user=user)
     )
+
+
+@cards_api.patch("/update/")
+async def update_name(
+    res: Response, data: UpdateCardName, user=Depends(get_current_user)
+):
+    return send_res(res, update_card_field(card_id=data.id, name=data.name, user=user))
 
 
 @cards_api.patch("/update/name")

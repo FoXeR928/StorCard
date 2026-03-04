@@ -7,13 +7,11 @@ class LoginUpdate(BaseModel):
 
 class RegistrationUser(BaseModel):
     login: str
-    user_name: str
+    user_name: Optional[str] = None
     password: str
 
 
-class UpdatePassword(LoginUpdate):
-    password: str
-
-
-class UpdateRole(LoginUpdate):
-    is_admin: bool = False
+class UpdateUser(LoginUpdate):
+    user_name: Optional[str] = None
+    password: Optional[str] = None
+    is_admin: Optional[bool] = False

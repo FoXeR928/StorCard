@@ -209,3 +209,5 @@ uv.lock
 
 data/
 logs/
+
+.idea/

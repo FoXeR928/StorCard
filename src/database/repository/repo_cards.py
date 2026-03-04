@@ -136,7 +136,7 @@ def update_card_field(id: uuid.UUID, user, **values):
 
             if result.rowcount == 0:
                 return error_403("Нет прав или карта не найдена")
-            return api_response(True, "Данные обновлены",201)
+            return api_response(True, "Данные обновлены", 201)
         except Exception as err:
             logger.error(f"Ошибка обновления {values}: {err}")
             return error_500()

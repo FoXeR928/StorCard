@@ -12,14 +12,6 @@ from src.database.repository.repo_users import (
 users_api = APIRouter(prefix="/users", tags=["Пользователи"])
 
 
-async def admin_required(current_user=Depends(get_current_user)):
-    if not current_user or not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Недостаточно прав доступа"
-        )
-    return current_user
-
-
 @users_api.get("/get", summary="Получение списка пользователей")
 async def get_users_api(_=Depends(admin_required)):
     return get_users_query()
@@ -30,7 +22,7 @@ async def get_users_api(_=Depends(admin_required)):
     summary="Создание пользователя",
     status_code=status.HTTP_201_CREATED,
 )
-async def registration_user_api(data: RegistrationUser, _=Depends(admin_required)):
+async def registration_user_api(requester: current_user, data: RegistrationUser):
     return registration_user_query(**data.model_dump())
 
 
@@ -39,6 +31,13 @@ async def update_password_user_api(
     data: UpdatePassword, current_user=Depends(get_current_user)
 ):
     return update_password_user_query(requester=current_user, **data.model_dump())
+
+
+@users_api.patch("/change/", summary="Смена роли пользователя")
+async def update_role_user_api(data: UpdateRole, current_user=Depends(admin_required)):
+    return update_role_user_query(
+        requester=current_user, **data.model_dump(exclude_unset=True)
+    )
 
 
 @users_api.patch("/change/role", summary="Смена роли пользователя")

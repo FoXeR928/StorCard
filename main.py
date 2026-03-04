@@ -23,6 +23,7 @@ def start_app():
             create_default_users()
 
             from src.database.repository.repo_config import get_all_configs_dict
+
             conf = get_all_configs_dict()
 
             port = int(conf.get("app_port", 7000))
