@@ -21,7 +21,7 @@ function install_request(){
         return create_flash("warning", "Не все поля заполнены");
     }
     $.ajax({
-        url:'/install',
+        url:'/v1/install',
         method:'POST',
         contentType: "application/json",
         data:JSON.stringify(db_data),

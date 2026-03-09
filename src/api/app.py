@@ -83,6 +83,6 @@ if Path(STATIC_DIR).exists():
 setup_routes(app)
 
 
-@app.get("/status", summary="Проверка сервера", tags=["System"])
+@app.get("/v1/status", summary="Проверка сервера", tags=["System"])
 async def get_status_api():
     return {"status": "OK", "app": APP_NAME, "version": APP_VERSION}

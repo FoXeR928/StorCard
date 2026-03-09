@@ -13,7 +13,7 @@ class OAuth2CookieStack(OAuth2PasswordBearer):
         return request.cookies.get("token")
 
 
-oauth2_scheme = OAuth2CookieStack(tokenUrl="auth/login", auto_error=False)
+oauth2_scheme = OAuth2CookieStack(tokenUrl="/v1/auth/login", auto_error=False)
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):

@@ -6,7 +6,7 @@ import src.core.system as system
 import src.database.repository.repo_install as repo_install
 from src.api.schemas.schemas_install import InstallSchemas
 
-install_api = APIRouter(prefix="", tags=["Установка API"])
+install_api = APIRouter(prefix="/v1", tags=["Установка API"])
 
 
 @install_api.post("/install", summary="Первичная настройка приложения")

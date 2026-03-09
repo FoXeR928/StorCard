@@ -59,34 +59,21 @@ def registration_user_query(
             return error_500()
 
 
-def update_password_user_query(requester: Any, login: str, password: str):
+def update_user_query(requester: Any, login: str, **values):
     if not (requester.is_admin or requester.login == login):
-        return error_403()
+        return error_403("Нет прав на изменение")
+    if not values:
+        return api_response(True, "Нет данных для обновления", 200)
     with engine.SessionLocal() as session:
         try:
             user = session.scalar(select(Users).where(Users.login == login))
             if not user:
                 return error_404("Пользователь не найден")
-            user.set_password(password)
-            session.commit()
-            logger.success(f"Пароль {login} обновлен")
-            return api_response(True, "Пароль изменен", 201)
-        except Exception as err:
-            session.rollback()
-            logger.error(f"Ошибка изменения: {err}")
-            return error_500()
-
-
-def update_user_query(requester: Any, login: str, **values):
-    if not (requester.is_admin or requester.login == login):
-        return error_403("Нет прав на изменение")
-    with engine.SessionLocal() as session:
-        try:
-            result = session.execute(
-                update(Users).where(Users.login == login).values(values)
-            )
-            if result.rowcount == 0:
-                return error_404("Пользователь не найден")
+            if "password" in values:
+                user.set_password(values.pop("password"))
+            for key, value in values.items():
+                if hasattr(user, key):
+                    setattr(user, key, value)
             session.commit()
             return api_response(True, "Информация изменена", 201)
         except Exception as err:

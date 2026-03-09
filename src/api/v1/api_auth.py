@@ -5,7 +5,7 @@ from src.api.depends import get_current_user
 from src.core.responses import api_response, error_500
 from src.database.repository.repo_config import get_all_configs_dict
 
-auth_api = APIRouter(prefix="/auth", tags=["Авторизация"])
+auth_api = APIRouter(prefix="/v1/auth", tags=["Авторизация"])
 
 
 @auth_api.post("/login", summary="Вход в систему")

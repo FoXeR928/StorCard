@@ -8,7 +8,7 @@ from src.database.repository.repo_config import (
 from src.api.schemas.schemas_config import ConfigUpdate
 import src.core.system as system
 
-config_api = APIRouter(prefix="/configs", tags=["Конфиги"])
+config_api = APIRouter(prefix="/v1/configs", tags=["Конфиги"])
 
 
 @config_api.get("/get", summary="Получение всех конфигов")

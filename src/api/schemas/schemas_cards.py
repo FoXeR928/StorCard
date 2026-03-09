@@ -22,7 +22,4 @@ class UpdateCard(CardBase):
     code_type: Optional[str] = None
     own: Optional[str] = None
     image: Optional[UploadFile] = None
-
-
-class AddCardAccess(CardBase):
-    login: str
+    access_login: str = None
