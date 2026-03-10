@@ -17,8 +17,10 @@ class Cards(Base, TimestampMixin):
     )
     image: Mapped[Optional[bytes]] = mapped_column(LargeBinary)
     version: Mapped[int] = mapped_column(default=1)
+    is_delete:Mapped[bool]=mapped_column(default=False)
     code: Mapped[str] = mapped_column(nullable=False)
     code_type: Mapped[str] = mapped_column(nullable=False)
+
     owner: Mapped["Users"] = relationship("Users", back_populates="cards")
     shared_access: Mapped[List["CardsAccess"]] = relationship(
         "CardsAccess", back_populates="card", cascade="all,delete-orphan"

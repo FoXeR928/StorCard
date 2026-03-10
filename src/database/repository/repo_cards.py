@@ -111,3 +111,6 @@ def delete_card_query(card_id: uuid.UUID, user):
         except Exception as err:
             logger.error(f"Ошибка удаления: {err}")
             return error_500()
+
+
+def sync_cards_query(requester,data**)
