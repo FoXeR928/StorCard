@@ -1,5 +1,9 @@
+import uuid
+from typing import Optional, List
+from pydantic import BaseModel
+
 class SyncItemShem(BaseModel):
-    id: UUID
+    id: uuid.UUID
     name: Optional[str]=None
     about: Optional[str]=None
     image: Optional[str]=None
@@ -9,5 +13,5 @@ class SyncItemShem(BaseModel):
     code: Optional[str]=None
     code_type: Optional[str] = None
 
-class SyncShem(Base):
-    changes:List[SyncItem]
+class SyncShem(BaseModel):
+    changes:List[SyncItemShem]

@@ -1,4 +1,3 @@
-import uuid
 from fastapi import APIRouter, Depends, Response
 from src.api.depends import get_current_user
 from src.api.schemas.schemas_cards import AddCard, CardBase, UpdateCard
