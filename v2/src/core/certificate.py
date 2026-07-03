@@ -6,7 +6,6 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from src.core.constants import CERTIFICATE_DIR
 import src.core.system as system
 
 
@@ -33,13 +32,14 @@ def generate_self_signed_cert(
 
 
 def init_ssl(cert_file: str = "ssl.pem", key_file: str = "key.pem"):
-    cert_path = CERTIFICATE_DIR / cert_file
-    key_path = CERTIFICATE_DIR / key_file
+    certs_dir="./date/certificates"
+    cert_path = certs_dir / cert_file
+    key_path = certs_dir / key_file
     if cert_path.exists() and key_path.exists():
         logger.info("SSL сертификат найден")
         return
     try:
-        cert_path.parent.mkdir(parents=True, exist_ok=True)
+        certs_dir.mkdir(parents=True, exist_ok=True)
         private_key, cert = generate_self_signed_cert(days=365)
         key_path.write_bytes(
             private_key.private_bytes(
