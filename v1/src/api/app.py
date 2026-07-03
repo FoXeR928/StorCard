@@ -9,7 +9,7 @@ from src.core.constants import PROJECT_FILE, STATIC_DIR
 
 
 def get_app_info():
-    default = {"name": "StorCard", "version": "0.1.0"}
+    default = {"name": "StorCard", "version": "0.0.0"}
     try:
         if Path(PROJECT_FILE).exists():
             with open(PROJECT_FILE, "rb") as f:
