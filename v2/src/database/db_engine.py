@@ -1,9 +1,9 @@
-import sys
+from os import getenv
+from pathlib import Path
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine import URL
 from sqlalchemy import create_engine
 from loguru import logger
-import src.core.config as config
 import src.core.system as system
 from src.database.base import Base
 
@@ -12,11 +12,12 @@ SessionLocal = sessionmaker()
 
 def init_db():
     try:
-        conf = config.get_db_config()
-        driver = conf.get("sql_driver")
+        driver = os.getenv("SQL_DRIVER", "sqlite")
         if driver == "sqlite":
-            url = f"sqlite:///{conf["db_path"]}/{conf["sql_db"]}.db"
+            Path("./data/db").mkdir(exist_ok=True, parents=True)
+            url = f"sqlite:///./data/db/base.db"
         elif driver in ["mysql", "postgresql"]:
+
             dialect = "mysql+pymysql" if driver == "mysql" else "postgresql+psycopg2"
             url = URL.create(
                 drivername=dialect,

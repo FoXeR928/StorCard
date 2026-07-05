@@ -17,7 +17,7 @@ class Cards(Base, TimestampMixin):
     )
     image: Mapped[Optional[bytes]] = mapped_column(LargeBinary)
     version: Mapped[int] = mapped_column(default=1)
-    is_delete:Mapped[bool]=mapped_column(default=False)
+    is_delete: Mapped[bool] = mapped_column(default=False)
     code: Mapped[str] = mapped_column(nullable=False)
     code_type: Mapped[str] = mapped_column(nullable=False)
 

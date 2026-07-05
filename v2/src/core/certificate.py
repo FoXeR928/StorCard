@@ -2,6 +2,7 @@ import datetime
 from datetime import datetime, timedelta, timezone
 from typing import Tuple
 from loguru import logger
+from pathlib import Path
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
@@ -32,7 +33,12 @@ def generate_self_signed_cert(
 
 
 def init_ssl(cert_file: str = "ssl.pem", key_file: str = "key.pem"):
-    certs_dir="./date/certificates"
+    certs_dir = Path("./date/certificates")
+    try:
+        certs_dir.mkdir(exist_ok=True, parents=True)
+    except Exception as err:
+        logger.critical(f"Ошибка генерации папки SSL: {err}")
+        system.stop_server(1)
     cert_path = certs_dir / cert_file
     key_path = certs_dir / key_file
     if cert_path.exists() and key_path.exists():

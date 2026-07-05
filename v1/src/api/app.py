@@ -11,7 +11,9 @@ def get_app_info():
     try:
         with open("./pyproject.toml", "rb") as f:
             data = tomllib.load(f).get("project", {})
-        return data.get("name", default["name"]), data.get("version", default["version"])
+        return data.get("name", default["name"]), data.get(
+            "version", default["version"]
+        )
     except Exception as e:
         logger.error(f"Metadata read error: {e}")
 
@@ -54,7 +56,6 @@ def setup_routes(app: FastAPI):
         logger.info("API успешно инициализировано")
     except Exception as e:
         logger.exception(f"Критическая ошибка при инициализации роутеров: {e}")
-        
 
 
 app = FastAPI(

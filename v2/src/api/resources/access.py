@@ -7,6 +7,7 @@ from loguru import logger
 from src.database.repository.repo_config import get_all_configs_dict
 from src.database.repository.repo_auth import get_user_by_login
 
+
 def create_access_token(login: str, expires_use: bool) -> str:
     try:
         conf = get_all_configs_dict()
@@ -42,6 +43,7 @@ def decode_access_token(token: str) -> Optional[str]:
     except Exception as err:
         logger.error(f"Непредвиденная ошибка декодирования: {err}")
         return None
+
 
 class OAuth2CookieStack(OAuth2PasswordBearer):
     async def __call__(self, request: Request) -> Optional[str]:
