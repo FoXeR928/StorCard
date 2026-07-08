@@ -35,6 +35,3 @@ def install_db(**kwargs):
         except Exception as err:
             logger.error(f"Ошибка записи настроек. Error: {err}")
             return error_500(f"Не удалось записать настройки: {err}")
-
-
-"""Проверено"""

@@ -97,6 +97,3 @@ def delete_user_query(requester: Any, login: str):
             session.rollback()
             logger.error(f"Ошибка удаления: {err}")
             return error_500()
-
-
-"""Проверено"""

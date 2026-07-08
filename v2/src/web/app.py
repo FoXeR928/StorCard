@@ -26,9 +26,9 @@ def setup_routes(app: FastAPI):
         config_exists = config.check_config()
 
         if config_exists:
-            from src.api.v1.api_auth import auth_api
-            from src.api.v1.api_config import config_api
-            from src.api.v1.api_users import users_api
+            from v2.src.api.api.v1.api_auth import auth_api
+            from v2.src.api.api.v1.api_config import config_api
+            from v2.src.api.api.v1.api_users import users_api
             from src.api.v1.api_cards import cards_api
 
             app.include_router(auth_api)
@@ -46,7 +46,7 @@ def setup_routes(app: FastAPI):
                 app.include_router(admin_route)
                 logger.info("Web-интерфейс инициализирован")
         else:
-            from src.api.v1.api_install import install_api
+            from v2.src.api.api.v1.api_install import install_api
             from src.web.routes.route_install import install_route
 
             app.include_router(install_api)
