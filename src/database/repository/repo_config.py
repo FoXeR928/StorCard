@@ -1,9 +1,9 @@
 from functools import lru_cache
 from loguru import logger
 from sqlalchemy import select, update
-import src.database.engine as engine
+from src.database.db_engine import engine
 from src.database.models.model_configs import Configs
-from src.core.responses import api_response, error_404
+from src.web.resources.responses import api_response, error_404
 
 
 @lru_cache(maxsize=1)

@@ -2,7 +2,7 @@ from sqlalchemy import update, case
 from loguru import logger
 from src.database.db_engine import engine
 from src.database.models.model_configs import Configs
-from src.core.responses import api_response, error_500
+from src.web.resources.responses import api_response, error_500
 
 
 def install_db(**install_date):

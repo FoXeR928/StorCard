@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from loguru import logger
-from src.api.depends import get_current_user
+from src.web.resources.access import get_current_user
 from src.database.repository.repo_config import (
     get_configs_list_api,
     update_config_query,
 )
-from src.api.schemas.schemas_config import ConfigUpdate
-import src.core.system as system
+from src.web.resources.schemas.schemas_config import ConfigUpdate
+import src.core.mg_system as mg_system
 
 config_api = APIRouter(prefix="/v1/configs", tags=["Конфиги"])
 
@@ -31,6 +31,6 @@ async def update_config_app_api(
         logger.warning(
             f"Конфиг {config_data.name} изменен. Запланирована перезагрузка."
         )
-        background_tasks.add_task(system.reboot_server, delay=2)
+        background_tasks.add_task(mg_system.reboot_server, delay=2)
 
     return result

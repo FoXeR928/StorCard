@@ -1,10 +1,10 @@
 from sqlalchemy import select, delete, func
 from loguru import logger
 import secrets
-import src.database.engine as engine
+from src.database.db_engine import engine
 from src.database.models.model_users import Users
 from src.database.models.model_configs import Configs
-import src.core.system as system
+from src.core.mg_system import system
 
 
 def create_default_users(recreate: bool = False, **kwargs):

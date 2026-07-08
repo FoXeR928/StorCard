@@ -4,28 +4,32 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine import URL
 from sqlalchemy import create_engine
 from loguru import logger
-import src.core.system as system
-from src.database.base import Base
+from src.core.mg_system import system
+from src.database.models.model_default import Base
+from src.database.repository.repo_default import (
+    create_default_users,
+    create_default_config,
+)
 
 SessionLocal = sessionmaker()
 
 
 def init_db():
     try:
-        driver = os.getenv("SQL_DRIVER", "sqlite")
+        driver = getenv("SQL_DRIVER", "sqlite")
+        db_name=getenv("SQL_DB", "storcard_db")
         if driver == "sqlite":
             Path("./data/db").mkdir(exist_ok=True, parents=True)
-            url = f"sqlite:///./data/db/base.db"
+            url = f"sqlite:///./data/db/{db_name}.db"
         elif driver in ["mysql", "postgresql"]:
-
             dialect = "mysql+pymysql" if driver == "mysql" else "postgresql+psycopg2"
             url = URL.create(
                 drivername=dialect,
-                username=conf["sql_user"],
-                password=conf["sql_password"],
-                host=conf["sql_host"],
-                port=conf["sql_port"],
-                database=conf["sql_db"],
+                username=getenv("SQL_USER"),
+                password=getenv("SQL_PASSWORD"),
+                host=getenv("SQL_HOST"),
+                port=getenv("SQL_PORT"),
+                database=db_name,
             )
         else:
             logger.critical(
@@ -36,6 +40,8 @@ def init_db():
         Base.metadata.create_all(engine)
         SessionLocal.configure(bind=engine)
         logger.success("База данных инициализирована")
+        create_default_config()
+        create_default_users()
         return engine
     except Exception as err:
         logger.critical(f"Не удалось инициализировать базу данных Ошибка: {err}")

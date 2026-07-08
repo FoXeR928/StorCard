@@ -1,22 +1,16 @@
 import uvicorn
 from loguru import logger
 from pathlib import Path
-import src.core.config as config
-import src.database.engine as engine
-import src.core.certificate as certificate
-import src.core.log as log
-import src.core.system as system
-from src.database.repository.repo_default import (
-    create_default_users,
-    create_default_config,
-)
+from src.database.db_engine import engine
+from src.core.mg_certificate import certificate
+from src.core.mg_logs import log
+from src.core.mg_system import system
 
 
 def start_app():
     try:
         engine.init_db()
-        create_default_config()
-        create_default_users()
+        
         from src.database.repository.repo_config import get_all_configs_dict
 
         conf = get_all_configs_dict()
