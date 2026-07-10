@@ -7,7 +7,7 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-import src.core.mg_system as mg_system
+import core.core_system as core_system
 
 
 def generate_self_signed_cert(
@@ -38,7 +38,7 @@ def init_ssl(cert_file: str = "ssl.pem", key_file: str = "key.pem"):
         certs_dir.mkdir(exist_ok=True, parents=True)
     except Exception as err:
         logger.critical(f"Ошибка генерации папки SSL: {err}")
-        mg_system.stop_server(1)
+        core_system.stop_server(1)
     cert_path = certs_dir / cert_file
     key_path = certs_dir / key_file
     if cert_path.exists() and key_path.exists():
@@ -57,4 +57,4 @@ def init_ssl(cert_file: str = "ssl.pem", key_file: str = "key.pem"):
         cert_path.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
     except Exception as err:
         logger.critical(f"Ошибка генерации SSL: {err}")
-        mg_system.stop_server(1)
+        core_system.stop_server(1)

@@ -1,4 +1,5 @@
-import sys
+from sys import stdout
+from datetime import datetime
 from pathlib import Path
 from loguru import logger
 
@@ -9,7 +10,7 @@ def init_log(log_level_file="INFO", log_level_std="WARNING"):
         Path("./data/logs").mkdir(exist_ok=True, parents=True)
         current_date = datetime.now().strftime("%Y-%m-%d")
         logger.add(
-            log_dir / "app_" + date + ".log",
+            "./data/logs" / "app_" + current_date + ".log",
             format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
             rotation="256 MB",
             retention="10 days",
@@ -18,11 +19,10 @@ def init_log(log_level_file="INFO", log_level_std="WARNING"):
             enqueue=True,
         )
         logger.add(
-            sys.stdout,
+            stdout,
             level=log_level_std,
             colorize=True,
             format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{message}</cyan>",
         )
     except Exception as err:
         logger.error(f"Ошибка инициализации логирования: {err}")
-        sys.exit(1)

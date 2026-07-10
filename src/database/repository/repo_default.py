@@ -1,15 +1,15 @@
-from sqlalchemy import select, delete, func
+from sqlalchemy import select, delete
 from loguru import logger
 import secrets
-from src.database.db_engine import engine
+from src.database.db_engine import SessionLocal
 from src.database.models.model_users import Users
 from src.database.models.model_configs import Configs
-from src.core.mg_system import system
+from core.core_system import system
 
 
 def create_default_users(recreate: bool = False, **kwargs):
     login = kwargs.get("admin_login", "admin")
-    with engine.SessionLocal() as session:
+    with SessionLocal() as session:
         try:
             if recreate:
                 session.execute(delete(Users))
@@ -39,13 +39,7 @@ def create_default_config(recreate: bool = False, **kwargs):
             "boolean",
         ),
         "app_port": ("Порт приложения", kwargs.get("app_port", 7000), "number"),
-        "skey": ("Ключ OAuth2", kwargs.get("token", secrets.token_hex(64)), "generate"),
         "debug": ("Подробное логирование", str(kwargs.get("debug", False)), "boolean"),
-        "front_status": (
-            "Наличие web интерфейса",
-            str(kwargs.get("front", True)),
-            "boolean",
-        ),
         "cert": ("Файл сертификат", kwargs.get("cert", "ssl.pem"), "file"),
         "cert_key": (
             "Файл ключ сертификата",
@@ -53,17 +47,17 @@ def create_default_config(recreate: bool = False, **kwargs):
             "file",
         ),
         "short_token": (
-            "Короткий токен (сек)",
+            "Короткоживущий токен (сек)",
             str(kwargs.get("short_token", 3600)),
             "number",
         ),
         "long_token": (
-            "Длинный токен (сек)",
+            "Долгоживущий токен (сек)",
             str(kwargs.get("long_token", 604800)),
             "number",
         ),
     }
-    with engine.SessionLocal() as session:
+    with SessionLocal() as session:
         try:
             if recreate:
                 session.execute(delete(Configs))

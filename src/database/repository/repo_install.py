@@ -1,12 +1,12 @@
-from sqlalchemy import update, case
+from sqlalchemy import update
 from loguru import logger
-from src.database.db_engine import engine
+from src.database.db_engine import SessionLocal
 from src.database.models.model_configs import Configs
 from src.web.resources.responses import api_response, error_500
 
 
 def install_db(**install_date):
-    with engine.SessionLocal() as session:
+    with SessionLocal() as session:
         try:
             for name, val in install_date.items():
                 session.execute(

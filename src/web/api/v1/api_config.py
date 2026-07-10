@@ -6,7 +6,7 @@ from src.database.repository.repo_config import (
     update_config_query,
 )
 from src.web.resources.schemas.schemas_config import ConfigUpdate
-import src.core.mg_system as mg_system
+import core.core_system as core_system
 
 config_api = APIRouter(prefix="/v1/configs", tags=["Конфиги"])
 
@@ -31,6 +31,6 @@ async def update_config_app_api(
         logger.warning(
             f"Конфиг {config_data.name} изменен. Запланирована перезагрузка."
         )
-        background_tasks.add_task(mg_system.reboot_server, delay=2)
+        background_tasks.add_task(core_system.reboot_server, delay=2)
 
     return result

@@ -1,16 +1,16 @@
-from sqlalchemy import select, update, delete, func
+from sqlalchemy import select, delete
 from loguru import logger
 from typing import Any
-from src.core.responses import api_response, error_404, error_500, error_403
+from src.web.resources.responses import api_response, error_404, error_500, error_403
 from src.database.models.model_users import Users
-import src.database.engine as engine
+from src.database.db_engine import SessionLocal
 
 
 def get_users_query(requester):
     if not requester.is_admin:
         return error_403()
     try:
-        with engine.SessionLocal() as session:
+        with SessionLocal() as session:
             users = (
                 session.execute(
                     select(
@@ -40,7 +40,7 @@ def registration_user_query(
 ):
     if not requester.is_admin:
         return error_403()
-    with engine.SessionLocal() as session:
+    with SessionLocal() as session:
         try:
             exists = session.scalar(select(Users).where(Users.login == login))
             if exists:
@@ -64,7 +64,7 @@ def update_user_query(requester: Any, login: str, **values):
         return error_403("Нет прав на изменение")
     if not values:
         return api_response(True, "Нет данных для обновления", 200)
-    with engine.SessionLocal() as session:
+    with SessionLocal() as session:
         try:
             user = session.scalar(select(Users).where(Users.login == login))
             if not user:
@@ -85,7 +85,7 @@ def update_user_query(requester: Any, login: str, **values):
 def delete_user_query(requester: Any, login: str):
     if not requester.is_admin:
         return error_403("Нет права на удаление")
-    with engine.SessionLocal() as session:
+    with SessionLocal() as session:
         try:
             result = session.execute(delete(Users).where(Users.login == login))
             if result.rowcount == 0:

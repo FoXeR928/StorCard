@@ -4,7 +4,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine import URL
 from sqlalchemy import create_engine
 from loguru import logger
-from src.core.mg_system import system
+from core.core_system import system
+from src.core.core_config import db_driver, db_name
 from src.database.models.model_default import Base
 from src.database.repository.repo_default import (
     create_default_users,
@@ -16,13 +17,11 @@ SessionLocal = sessionmaker()
 
 def init_db():
     try:
-        driver = getenv("SQL_DRIVER", "sqlite")
-        db_name=getenv("SQL_DB", "storcard_db")
-        if driver == "sqlite":
+        if db_driver == "sqlite":
             Path("./data/db").mkdir(exist_ok=True, parents=True)
             url = f"sqlite:///./data/db/{db_name}.db"
-        elif driver in ["mysql", "postgresql"]:
-            dialect = "mysql+pymysql" if driver == "mysql" else "postgresql+psycopg2"
+        elif db_driver in ["mysql", "postgresql"]:
+            dialect = "mysql+pymysql" if db_driver == "mysql" else "postgresql+psycopg2"
             url = URL.create(
                 drivername=dialect,
                 username=getenv("SQL_USER"),

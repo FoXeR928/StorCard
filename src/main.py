@@ -2,9 +2,9 @@ import uvicorn
 from loguru import logger
 from pathlib import Path
 from src.database.db_engine import engine
-from src.core.mg_certificate import certificate
-from src.core.mg_logs import log
-from src.core.mg_system import system
+from core.core_certificate import certificate
+from core.core_logs import log
+from core.core_system import system
 
 
 def start_app():

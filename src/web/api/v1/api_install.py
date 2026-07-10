@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Response, BackgroundTasks
 from loguru import logger
-import src.core.mg_system as mg_system
+import core.core_system as core_system
 import src.database.repository.repo_install as repo_install
 from src.web.resources.schemas.schemas_install import InstallSchemas
 
@@ -16,6 +16,6 @@ async def install(
     result = repo_install.install_db(**configs.model_dump())
     response.status_code = result.get("code", 201)
     if result.get("result"):
-        background_task.add_task(mg_system.reboot_server, delay=2)
+        background_task.add_task(core_system.reboot_server, delay=2)
         logger.info("Задача перезагрузки сервера добавлена в очередь")
     return result
