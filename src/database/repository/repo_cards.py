@@ -22,7 +22,7 @@ def sync_cards_query(requester, data):
                     for key, value in update_data.items():
                         setattr(db_item, key, value)
             else:
-                
+
                 session.add
 
         session.commit()

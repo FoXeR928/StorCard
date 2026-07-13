@@ -1,16 +1,16 @@
 import uvicorn
 from loguru import logger
 from pathlib import Path
-from src.database.db_engine import engine
+from src.database.db_engine import init_db
 from core.core_certificate import certificate
 from core.core_logs import log
-from core.core_system import system
+from core.core_system import stop_server
 
 
 def start_app():
     try:
-        engine.init_db()
-        
+        init_db()
+
         from src.database.repository.repo_config import get_all_configs_dict
 
         conf = get_all_configs_dict()
@@ -47,4 +47,4 @@ if __name__ == "__main__":
         start_app()
     except Exception as err:
         logger.error(f"Критическая ошибка сервера: {err}")
-        system.stop_server(1)
+        stop_server(1)

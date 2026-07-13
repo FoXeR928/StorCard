@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from loguru import logger
-from src.web.resources.access import get_current_user
+from src.database.repository.repo_users import get_current_user
 from src.database.repository.repo_config import (
     get_configs_list_api,
     update_config_query,
@@ -8,17 +8,17 @@ from src.database.repository.repo_config import (
 from src.web.resources.schemas.schemas_config import ConfigUpdate
 import core.core_system as core_system
 
-config_api = APIRouter(prefix="/v1/configs", tags=["Конфиги"])
+api_configs_v1 = APIRouter(prefix="/v1/configs", tags=["Конфиги"])
 
 
-@config_api.get("/get", summary="Получение всех конфигов")
+@api_configs_v1.get("/get", summary="Получение всех конфигов")
 async def get_configs_app_api(user=Depends(get_current_user)):
     if not user.get("is_admin"):
         raise HTTPException(403, "Доступ только для администраторов")
     return get_configs_list_api()
 
 
-@config_api.patch("/update", summary="Обновление конфига")
+@api_configs_v1.patch("/update", summary="Обновление конфига")
 async def update_config_app_api(
     config_data: ConfigUpdate,
     background_tasks: BackgroundTasks,
@@ -32,5 +32,4 @@ async def update_config_app_api(
             f"Конфиг {config_data.name} изменен. Запланирована перезагрузка."
         )
         background_tasks.add_task(core_system.reboot_server, delay=2)
-
     return result

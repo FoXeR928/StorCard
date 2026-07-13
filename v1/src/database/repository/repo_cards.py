@@ -1,6 +1,3 @@
-
-
-
 def check_card_permission(session, card_id, user):
     card = session.scalar(select(Cards).where(Cards.id == card_id))
     if not card:

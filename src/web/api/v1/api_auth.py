@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Response, Depends, HTTPException, Form
 from loguru import logger
 from src.database.repository.repo_auth import authenticate_user
-from src.api.depends import get_current_user
-from src.core.responses import api_response, error_500
+from src.database.repository.repo_auth import get_current_user
+from src.web.resources.responses import api_response, error_500
 from src.database.repository.repo_config import get_all_configs_dict
 
-auth_api = APIRouter(prefix="/v1/auth", tags=["Авторизация"])
+api_auth_v1 = APIRouter(prefix="/v1/auth", tags=["Авторизация"])
 
 
-@auth_api.post("/login", summary="Вход в систему")
+@api_auth_v1.post("/login", summary="Вход в систему")
 async def login_api(
     response: Response,
     username: str = Form(...),
@@ -30,19 +30,19 @@ async def login_api(
             max_age=max_age,
         )
         return result
-    except HTTPException as he:
-        raise he
-    except Exception as e:
-        logger.error(f"Ошибка входа {username}: {e}")
+    except HTTPException as error:
+        raise error
+    except Exception as error:
+        logger.error(f"Ошибка входа {username}: {error}")
         return error_500("Внутренняя ошибка сервера")
 
 
-@auth_api.post("/logout", summary="Выход")
+@api_auth_v1.post("/logout", summary="Выход")
 async def logout_api(response: Response, user=Depends(get_current_user)):
     response.delete_cookie(key="token")
     return api_response(True, "Пользователь деавторизирован", 200)
 
 
-@auth_api.get("/me", summary="Профиль")
+@api_auth_v1.get("/me", summary="Профиль")
 async def get_me(user=Depends(get_current_user)):
     return api_response(True, "Данные получены", 200, user=user)

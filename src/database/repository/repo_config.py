@@ -10,11 +10,11 @@ from src.web.resources.responses import api_response, error_404
 def get_all_configs_dict():
     with SessionLocal() as session:
         rows = session.execute(select(Configs.name, Configs.value)).all()
-        return {row.name: row.value for row in rows}
+    return {row.name: row.value for row in rows}
 
 
-def get_config_val(name: str, default=None):
-    return get_all_configs_dict().get(name, default)
+def get_config_val(name: str):
+    return get_all_configs_dict().get(name)
 
 
 def update_config_query(name: str, value: str):

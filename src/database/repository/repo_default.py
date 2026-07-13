@@ -4,7 +4,7 @@ import secrets
 from src.database.db_engine import SessionLocal
 from src.database.models.model_users import Users
 from src.database.models.model_configs import Configs
-from core.core_system import system
+from core.core_system import stop_server
 
 
 def create_default_users(recreate: bool = False, **kwargs):
@@ -29,6 +29,7 @@ def create_default_users(recreate: bool = False, **kwargs):
         except Exception as err:
             session.rollback()
             logger.error(f"Критическая ошибка при настройке пользователей : {err}")
+            stop_server(1)
 
 
 def create_default_config(recreate: bool = False, **kwargs):
@@ -76,4 +77,4 @@ def create_default_config(recreate: bool = False, **kwargs):
         except Exception as err:
             session.rollback()
             logger.critical(f"Критическая ошибка при настройке конфигов: {err}")
-            system.stop_server(1)
+            stop_server(1)

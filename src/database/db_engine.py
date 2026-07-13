@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine import URL
 from sqlalchemy import create_engine
 from loguru import logger
-from core.core_system import system
-from src.core.core_config import db_driver, db_name
+from core.core_system import stop_server
+from src.core.core_config import DB_DRIVER, DB_NAME
 from src.database.models.model_default import Base
 from src.database.repository.repo_default import (
     create_default_users,
@@ -17,24 +17,24 @@ SessionLocal = sessionmaker()
 
 def init_db():
     try:
-        if db_driver == "sqlite":
+        if DB_DRIVER == "sqlite":
             Path("./data/db").mkdir(exist_ok=True, parents=True)
-            url = f"sqlite:///./data/db/{db_name}.db"
-        elif db_driver in ["mysql", "postgresql"]:
-            dialect = "mysql+pymysql" if db_driver == "mysql" else "postgresql+psycopg2"
+            url = f"sqlite:///./data/db/{DB_NAME}.db"
+        elif DB_DRIVER in ["mysql", "postgresql"]:
+            dialect = "mysql+pymysql" if DB_DRIVER == "mysql" else "postgresql+psycopg2"
             url = URL.create(
                 drivername=dialect,
                 username=getenv("SQL_USER"),
                 password=getenv("SQL_PASSWORD"),
                 host=getenv("SQL_HOST"),
                 port=getenv("SQL_PORT"),
-                database=db_name,
+                database=DB_NAME,
             )
         else:
             logger.critical(
                 f"Не удалось инициализировать базу данных Ошибка: Недопустимы драйвер БД"
             )
-            system.stop_server(1)
+            stop_server(1)
         engine = create_engine(url)
         Base.metadata.create_all(engine)
         SessionLocal.configure(bind=engine)
@@ -44,4 +44,4 @@ def init_db():
         return engine
     except Exception as err:
         logger.critical(f"Не удалось инициализировать базу данных Ошибка: {err}")
-        system.stop_server(1)
+        stop_server(1)
