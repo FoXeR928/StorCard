@@ -1,12 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
-from core.core_system import stop_server
+from sys import exit
 from core.core_config import APP_NAME, APP_DESCRIPTION, APP_VERSION
 from web.api.api_auth import api_auth
 from web.api.api_users import api_users
 from web.api.api_cards import api_cards
-
 
 app = FastAPI(
     title=APP_NAME,
@@ -30,9 +29,9 @@ try:
     logger.info("API успешно инициализировано")
 except Exception as e:
     logger.exception(f"Критическая ошибка при инициализации роутеров: {e}")
-    stop_server(1)
+    exit(1)
 
 
-@app.get("status", summary="Проверка сервера", tags=["System"])
+@app.get("/status", summary="Проверка сервера", tags=["System"])
 async def get_status_api():
     return {"status": "OK", "app": APP_NAME, "version": APP_VERSION}

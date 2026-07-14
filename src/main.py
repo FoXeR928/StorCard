@@ -3,7 +3,6 @@ from loguru import logger
 from database.db_engine import init_db
 from core.core_logs import init_log
 from core.core_config import PORT, log_level
-from core.core_system import stop_server
 from web.app import app
 
 
@@ -29,8 +28,4 @@ def start_app():
 
 
 if __name__ == "__main__":
-    try:
-        start_app()
-    except Exception as err:
-        logger.error(f"Критическая ошибка сервера: {err}")
-        stop_server(1)
+    start_app()

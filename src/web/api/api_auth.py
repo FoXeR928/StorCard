@@ -5,7 +5,7 @@ from typing import Optional
 from loguru import logger
 from database.repository.repo_auth import authenticate_user, get_user_by_login
 from web.resources.responses import api_response, error_500
-from core.core_config import ACCESS_TOKEN, REFRESH_TOKEN
+from core.core_config import ACCESS_TOKEN, REFRESH_TOKEN, SECRET_KEY
 
 api_auth = APIRouter(prefix="/auth", tags=["Авторизация"])
 
@@ -26,8 +26,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(401, "Not authenticated")
 
     try:
-        skey = get_config_val("skey")
-        payload = jwt.decode(token, skey, algorithms=["HS256"], leeway=10)
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"], leeway=10)
         login = payload.get("sub")
     except Exception as err:
         logger.error(f"Непредвиденная ошибка декодирования: {err}")

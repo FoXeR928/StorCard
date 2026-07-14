@@ -1,9 +1,9 @@
 from os import getenv
 from pathlib import Path
+from sys import exit
 from sqlalchemy.engine import URL
 from sqlalchemy import create_engine
 from loguru import logger
-from core.core_system import stop_server
 from core.core_config import DB_DRIVER, DB_NAME
 from database.models.model_default import Base
 from database.db_connect import SessionLocal
@@ -29,7 +29,7 @@ def init_db():
             logger.critical(
                 f"Не удалось инициализировать базу данных Ошибка: Недопустимы драйвер БД"
             )
-            stop_server(1)
+            exit(1)
         engine = create_engine(url)
         Base.metadata.create_all(engine)
         SessionLocal.configure(bind=engine)
@@ -38,4 +38,4 @@ def init_db():
         return engine
     except Exception as err:
         logger.critical(f"Не удалось инициализировать базу данных Ошибка: {err}")
-        stop_server(1)
+        exit(1)
