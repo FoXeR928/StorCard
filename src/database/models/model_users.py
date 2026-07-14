@@ -2,7 +2,7 @@ import bcrypt
 import uuid
 from typing import List, Optional
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from src.database.base import Base, TimestampMixin
+from database.models.model_default import Base, TimestampMixin
 
 
 class Users(Base, TimestampMixin):

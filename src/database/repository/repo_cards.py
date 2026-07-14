@@ -1,10 +1,8 @@
-import uuid
 from loguru import logger
 from sqlalchemy import select, or_, update, delete, insert
-from src.database.models.model_cards import Cards
-from src.database.models.model_cards_access import CardsAccess
-from src.database.db_engine import SessionLocal
-from src.web.resources.responses import api_response, error_403, error_500
+from database.models.model_cards import Cards, CardsAccess
+from database.db_connect import SessionLocal
+from web.resources.responses import api_response, error_403, error_500
 
 
 def sync_cards_query(requester, data):

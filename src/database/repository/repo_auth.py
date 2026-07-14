@@ -1,42 +1,10 @@
 import jwt
 from sqlalchemy import select
 from loguru import logger
-from fastapi import Depends, HTTPException, Request
 from datetime import datetime, timedelta, timezone
-from typing import Optional
-from fastapi.security import OAuth2PasswordBearer
-from src.database.models.model_users import Users
-from src.database.db_engine import SessionLocal
-from src.web.resources.responses import api_response, error_401, error_500
-from src.database.repository.repo_config import get_config_val
-
-
-class OAuth2CookieStack(OAuth2PasswordBearer):
-    async def __call__(self, request: Request) -> Optional[str]:
-        header_auth = request.headers.get("Authorization")
-        if header_auth:
-            return await super().__call__(request)
-        return request.cookies.get("token")
-
-
-oauth2_scheme = OAuth2CookieStack(tokenUrl="/v1/auth/login", auto_error=False)
-
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    if not token:
-        raise HTTPException(401, "Not authenticated")
-
-    try:
-        skey = get_config_val("skey")
-        payload = jwt.decode(token, skey, algorithms=["HS256"], leeway=10)
-        login = payload.get("sub")
-    except Exception as err:
-        logger.error(f"Непредвиденная ошибка декодирования: {err}")
-        raise HTTPException(401, "Token invalid or expired")
-    user = get_user_by_login(login)
-    if not user:
-        raise HTTPException(404, "User not found")
-    return user
+from database.models.model_users import Users
+from database.db_connect import SessionLocal
+from web.resources.responses import api_response, error_401, error_500
 
 
 def get_user_by_login(login: str):

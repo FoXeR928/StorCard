@@ -1,9 +1,34 @@
 from sqlalchemy import select, delete
 from loguru import logger
 from typing import Any
-from src.web.resources.responses import api_response, error_404, error_500, error_403
-from src.database.models.model_users import Users
-from src.database.db_engine import SessionLocal
+from web.resources.responses import api_response, error_404, error_500, error_403
+from database.models.model_users import Users
+from database.db_connect import SessionLocal
+from core.core_system import stop_server
+
+def create_default_users(recreate: bool = False, **kwargs):
+    login = kwargs.get("admin_login", "admin")
+    with SessionLocal() as session:
+        try:
+            if recreate:
+                session.execute(delete(Users))
+                logger.warning("Таблица Users очищена")
+            exists_admin = session.scalar(select(Users).where(Users.is_admin == True))
+            logger.trace("Проверенно существование записей в базе Users")
+            if not exists_admin:
+                admin = Users(
+                    login=login,
+                    user_name=kwargs.get("admin_name", "админ"),
+                    is_admin=True,
+                )
+                admin.set_password(kwargs.get("admin_password", "admin"))
+                session.add(admin)
+                session.commit()
+                logger.success(f"Создан дефолтный админ: {login}")
+        except Exception as err:
+            session.rollback()
+            logger.error(f"Критическая ошибка при настройке пользователей : {err}")
+            stop_server(1)
 
 
 def get_users_query(requester):

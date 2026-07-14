@@ -15,9 +15,3 @@ class TimestampMixin:
     date_update: Mapped[datetime] = mapped_column(
         DateTime, onupdate=func.now(), nullable=True
     )
-
-
-from src.database.models.model_users import Users
-from src.database.models.model_cards import Cards
-from src.database.models.model_configs import Configs
-from src.database.models.model_cards_access import CardsAccess

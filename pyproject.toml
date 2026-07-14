@@ -1,11 +1,10 @@
 [project]
 name = "storcard"
-version = "0.2.0.5"
-description = "Add your description here"
+version = "0.2.1.0"
+description = "Your own server for storing discount cards"
 authors = [
     {name = "foxer928"}
 ]
-repository = "https://github.com/FoXeR928/StorCard"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -19,6 +18,14 @@ dependencies = [
     "uvicorn[standard]>=0.35.0",
     "cryptography>=46.0.4",
 ]
+[project.urls]
+repository = "https://github.com/FoXeR928/StorCard"
+
+[project.scripts]
+app = "main:start_app"
+
+[tool.uv]
+package = true
 
 [dependency-groups]
 dev = [
@@ -26,8 +33,10 @@ dev = [
     "pytest>=9.0.2",
     "pytest-timeout>=2.4.0",
 ]
+
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = ["./src/"]
 testpaths = ["tests"]
+
 [tool.black]
 target-version = ['py312']

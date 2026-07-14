@@ -1,18 +1,13 @@
 from os import getenv
 from pathlib import Path
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine import URL
 from sqlalchemy import create_engine
 from loguru import logger
 from core.core_system import stop_server
-from src.core.core_config import DB_DRIVER, DB_NAME
-from src.database.models.model_default import Base
-from src.database.repository.repo_default import (
-    create_default_users,
-    create_default_config,
-)
-
-SessionLocal = sessionmaker()
+from core.core_config import DB_DRIVER, DB_NAME
+from database.models.model_default import Base
+from database.db_connect import SessionLocal
+from database.repository.repo_users import create_default_users
 
 
 def init_db():
@@ -39,7 +34,6 @@ def init_db():
         Base.metadata.create_all(engine)
         SessionLocal.configure(bind=engine)
         logger.success("База данных инициализирована")
-        create_default_config()
         create_default_users()
         return engine
     except Exception as err:

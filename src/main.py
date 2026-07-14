@@ -1,39 +1,25 @@
 import uvicorn
 from loguru import logger
-from pathlib import Path
-from src.database.db_engine import init_db
-from core.core_certificate import certificate
-from core.core_logs import log
+from database.db_engine import init_db
+from core.core_logs import init_log
+from core.core_config import PORT, log_level
 from core.core_system import stop_server
+from web.app import app
 
 
 def start_app():
     try:
+        init_log(log_level_std=log_level)
         init_db()
-
-        from src.database.repository.repo_config import get_all_configs_dict
-
-        conf = get_all_configs_dict()
-
-        port = int(conf.get("app_port"))
-        cert_file = conf.get("cert", cert_file)
-        key_file = conf.get("cert_key", key_file)
-        if conf.get("debug") in ("true", "1"):
-            log_level = "TRACE"
-        log.init_log(log_level_std=log_level)
-        certificate.init_ssl(cert_file=cert_file, key_file=key_file)
         logger.info("Конфигурация загружена из БД")
     except Exception as e:
-        logger.error(f"Ошибка загрузки конфига из БД: {e}. Используем дефолты.")
-
+        logger.error(f"Ошибка загрузки конфига из БД: {e}.")
     try:
-        logger.success(f"Сервер запускается на 0.0.0.0:{port} (Log: {log_level})")
+        logger.success(f"Сервер запускается на 0.0.0.0:{PORT} (Log: {log_level})")
         uvicorn.run(
-            app="src.api.app:app",
+            app=app,
             host="0.0.0.0",
-            port=port,
-            ssl_certfile=Path("./date/certificates") / cert_file,
-            ssl_keyfile=Path("./date/certificates") / key_file,
+            port=PORT,
             log_level=log_level.lower(),
         )
     except Exception as err:
