@@ -5,15 +5,21 @@ from pydantic import BaseModel
 
 class SyncItemShem(BaseModel):
     id: uuid.UUID
-    name: Optional[str] = None
+    name: str
     about: Optional[str] = None
     image: Optional[str] = None
     own_login: str
     version: int
-    is_deleted: Optional[bool] = None
-    code: Optional[str] = None
-    code_type: Optional[str] = None
+    is_deleted: bool
+    code: str
+    code_type: str
 
 
-class SyncShem(BaseModel):
+class UpstreamSyncShem(BaseModel):
     changes: List[SyncItemShem]
+
+
+class DownstreamSyncResponse(BaseModel):
+    changes: List[SyncItemShem]
+    current_server_version: int
+    has_more: bool

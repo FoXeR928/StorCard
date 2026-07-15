@@ -16,9 +16,9 @@ def init_db():
             Path("./data/db").mkdir(exist_ok=True, parents=True)
             url = f"sqlite:///./data/db/{DB_NAME}.db"
         elif DB_DRIVER in ["mysql", "postgresql"]:
-            dialect = "mysql+pymysql" if DB_DRIVER == "mysql" else "postgresql+psycopg2"
+            driver = "mysql+pymysql" if DB_DRIVER == "mysql" else "postgresql+psycopg2"
             url = URL.create(
-                drivername=dialect,
+                drivername=driver,
                 username=getenv("SQL_USER"),
                 password=getenv("SQL_PASSWORD"),
                 host=getenv("SQL_HOST"),
