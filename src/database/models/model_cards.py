@@ -38,6 +38,7 @@ class CardsAccess(Base, TimestampMixin):
     card_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("cards.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False
     )
+    access_type: Mapped[str] = mapped_column(default="read", nullable=False)
 
     user: Mapped["Users"] = relationship("Users", back_populates="shared_cards")
     card: Mapped["Cards"] = relationship("Cards", back_populates="shared_access")
