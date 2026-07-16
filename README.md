@@ -23,3 +23,5 @@ StorCard is your own server for storing discount cards
 Содержит параметр пользователя базы данных
 #### SQL_PASSWORD
 Содержит параметр пароль пользователя базы данных
+#### DEBUG
+Содержит параметры уровня логрования

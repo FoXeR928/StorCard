@@ -3,30 +3,28 @@ from sqlalchemy import select
 from loguru import logger
 from datetime import datetime, timedelta, timezone
 from database.models.model_users import Users
-from database.db_connect import SessionLocal
+from database.db_connect import AsyncSessionLocal
 from web.resources.responses import api_response, error_401, error_500
 from core.core_config import REFRESH_TOKEN, ACCESS_TOKEN, SECRET_KEY
 
 
-def get_user_by_login(login: str):
-    with SessionLocal() as session:
-        return (
-            session.execute(
-                select(Users.login, Users.user_name, Users.is_admin).where(
-                    Users.login == login
-                )
+async def get_user_by_login(login: str):
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(Users.login, Users.user_name, Users.is_admin).where(
+                Users.login == login
             )
-            .mappings()
-            .one_or_none()
         )
+        return result.mappings().one_or_none()
 
 
-def authenticate_user(login: str, password: str, long_session: bool):
+async def authenticate_user(login: str, password: str, long_session: bool):
     try:
-        with SessionLocal() as session:
-            user = session.scalars(
+        async with AsyncSessionLocal() as session:
+            user_query = await session.execute(
                 select(Users).where(Users.login == login)
-            ).one_or_none()
+            )
+            user = user_query.scalars().one_or_none()
             if not user or not user.check_password(password):
                 return error_401()
             if long_session:

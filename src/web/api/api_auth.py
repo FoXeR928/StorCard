@@ -24,14 +24,13 @@ oauth2_scheme = OAuth2CookieStack(tokenUrl="/auth/login", auto_error=False)
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     if not token:
         raise HTTPException(401, "Not authenticated")
-
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"], leeway=10)
         login = payload.get("sub")
     except Exception as err:
         logger.error(f"Непредвиденная ошибка декодирования: {err}")
         raise HTTPException(401, "Token invalid or expired")
-    user = get_user_by_login(login)
+    user = await get_user_by_login(login)
     if not user:
         raise HTTPException(404, "User not found")
     return user
@@ -45,7 +44,7 @@ async def login_api(
     expires_use: bool = Form(False),
 ):
     try:
-        result = authenticate_user(username, password, expires_use)
+        result = await authenticate_user(username, password, expires_use)
         if not result["result"]:
             raise HTTPException(status_code=result["code"], detail=result["message"])
         if expires_use:

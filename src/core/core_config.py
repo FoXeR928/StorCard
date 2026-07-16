@@ -7,21 +7,24 @@ from sys import exit
 
 DB_DRIVER = getenv("SQL_DRIVER", "sqlite")
 DB_NAME = getenv("SQL_DB", "storcard_db")
-PORT = getenv("PORT", 7000)
 APP_NAME = metadata("storcard")["Name"]
 APP_DESCRIPTION = metadata("storcard")["Description"]
 APP_VERSION = version("storcard")
 ACCESS_TOKEN = getenv("ACCESS_TOKEN", 3600)
 REFRESH_TOKEN = getenv("REFRESH_TOKEN", 604800)
 
-DEBUG = getenv("DEBUG", 0)
-if DEBUG == 1:
-    log_level = "TRACE"
-elif DEBUG == 0:
-    log_level = "WARNING"
-else:
-    log_level = "WARNING"
-    logger.warning("[WARNING] Неизвестный уровень логировани, установлен 0")
+DEBUG_LEVEL = getenv("DEBUG_LEVEL", 4)
+DEBUG_LEVEL = max(0, min(DEBUG_LEVEL, 6))
+LOG_LEVELS = {
+    6: "TRACE",
+    5: "DEBUG",
+    4: "INFO",
+    3: "SUCCESS",
+    2: "WARNING",
+    1: "ERROR",
+    0: "CRITICAL",
+}
+log_level = LOG_LEVELS[DEBUG_LEVEL]
 
 key_file = Path("./data/secret.key")
 try:
