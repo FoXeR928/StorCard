@@ -1,201 +1,151 @@
-from fastapi import APIRouter, Response, Depends, UploadFile
-from pydantic import BaseModel
-from typing import Optional, List
+from pathlib import Path
+from typing import Optional
 from loguru import logger
+from fastapi import APIRouter, Depends, UploadFile, File, status, HTTPException
+from pydantic import BaseModel
 
-from api.api_auth import User, get_current_user
-from db_modules.db_query_cards import (
-    all_cards_query,
-    user_cards_query,
-    get_card_query,
-    add_card_query,
-    update_card_name_query,
-    update_card_about_query,
-    update_card_code_query,
-    update_card_image_query,
-    delete_card_query,
-    update_card_own_query,
-    add_card_access_query,
-)
-from api.api_answer import error_access,error_auth
+from api.api_auth import get_current_user, UserSchema
+from db.db_cards import CardRepository
 
-try:
-    cards_app = APIRouter(prefix="/cards", tags=["Карты"])
-    logger.debug("Инициализирован API карт")
-except Exception as err:
-    logger.error(f"Ошибка инициализации API: {err}")
+cards_app = APIRouter(prefix="/cards", tags=["Карты"])
+
+MEDIA_DIR = Path("/app/data/media")
 
 
-class AddCard(BaseModel):
+class AddCardSchema(BaseModel):
     name: str
     about: Optional[str] = None
-    code: str
-    code_type: str
+    barcode: str 
 
 
-class Card(BaseModel):
-    id: int
+class UpdateCardSchema(BaseModel):
+    name: Optional[str] = None
+    about: Optional[str] = None
+    barcode: Optional[str] = None
 
 
-class UpdateCardName(Card):
-    name: str
+class ShareAccessSchema(BaseModel):
+    target_login: str
+    access_level: str 
 
 
-class UpdateCardAbout(Card):
-    about: str
+class ChangeOwnerSchema(BaseModel):
+    target_login: str
+
+@cards_app.get("/", summary="Получение личных карт текущего пользователя")
+async def get_my_cards(current_user: UserSchema = Depends(get_current_user)):
+    """Возвращает список карт, к которым у текущего авторизованного пользователя есть доступ."""
+    return CardRepository.get_cards(current_user=current_user, global_view=False)
 
 
-class UpdateCardCode(Card):
-    code: str
-    code_type: str
+@cards_app.get("/all", summary="Получение ВСЕХ карт в базе данных (Только для глобального Администратора)")
+async def get_all_cards(current_user: UserSchema = Depends(get_current_user)):
+    """Доступно только пользователям с флагом is_admin=True."""
+    return CardRepository.get_cards(current_user=current_user, global_view=True)
 
 
-class UpdateCardOwn(Card):
-    own: str
+@cards_app.get("/{card_id}", summary="Получение детальной информации о конкретной карте")
+async def get_card_by_id(card_id: str, current_user: UserSchema = Depends(get_current_user)):
+    return CardRepository.get_card_detail(card_id=card_id, current_user=current_user)
 
 
-class AddCardAccess(Card):
-    login: str
-
-
-@cards_app.get("/get", summary="Получение всех карт в базе")
-async def get_cards_all_api(
-    response: Response, current_user: User = Depends(get_current_user)
-):
-    if current_user==None:
-        result=error_auth
-    else:
-        if current_user.is_admin == True:
-            result = all_cards_query()
-        else:
-            result = error_access
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
-
-
-@cards_app.get("/user/get", summary="Получение всех карт в базе")
-async def get_cards_user_api(
-    response: Response, current_user: User = Depends(get_current_user)
-):
-    result = user_cards_query(user=current_user)
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
-
-
-@cards_app.get("/card/get", summary="Получение карты из базе")
-async def get_card_api(
-    response: Response, card_id: int, current_user: User = Depends(get_current_user)
-):
-    result = get_card_query(card_id=card_id, user=current_user)
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
-
-
-@cards_app.post("/add", summary="Добавление карты в базу")
-async def add_card_api(
-    response: Response, add: AddCard, current_user: User = Depends(get_current_user)
-):
-    result = add_card_query(
-        name=add.name,
-        about=add.about,
-        user=current_user,
-        code=add.code,
-        code_type=add.code_type,
+@cards_app.post("/", status_code=status.HTTP_201_CREATED, summary="Создание новой дисконтной карты")
+async def create_card(card_data: AddCardSchema, current_user: UserSchema = Depends(get_current_user)):
+    return CardRepository.add_card(
+        name=card_data.name,
+        about=card_data.about,
+        barcode=card_data.barcode,
+        current_user=current_user
     )
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
 
 
-@cards_app.post("/add/access", summary="Добавление доступа к карте")
-async def add_card_access_api(
-    response: Response,
-    access: AddCardAccess,
-    current_user: User = Depends(get_current_user),
+@cards_app.patch("/{card_id}", summary="Универсальное обновление текстовых параметров карты")
+async def update_card_fields(
+    card_id: str, 
+    update_data: UpdateCardSchema, 
+    current_user: UserSchema = Depends(get_current_user)
 ):
-    result = add_card_access_query(
-        card_id=access.id, login=access.login, user=current_user
+    """
+    Позволяет обновить имя, описание или штрихкод карты в любом сочетании.
+    Доступно пользователям с уровнем прав 'owner' или 'editor'.
+    """
+    return CardRepository.update_card(
+        card_id=card_id,
+        update_data=update_data.model_dump(),
+        current_user=current_user
     )
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
 
 
-@cards_app.patch("/update/name", summary="Обновление имени карты")
-async def update_card_name_api(
-    response: Response,
-    name: UpdateCardName,
-    current_user: User = Depends(get_current_user),
+@cards_app.post("/{card_id}/share", status_code=status.HTTP_201_CREATED, summary="Предоставление доступа к карте другому пользователю")
+async def share_card(
+    card_id: str, 
+    share_data: ShareAccessSchema, 
+    current_user: UserSchema = Depends(get_current_user)
 ):
-    result = update_card_name_query(card_id=name.id, user=current_user, name=name.name)
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
-
-
-@cards_app.patch("/update/about", summary="Обновление описания карты")
-async def update_card_about_api(
-    response: Response,
-    about: UpdateCardAbout,
-    current_user: User = Depends(get_current_user),
-):
-    result = update_card_about_query(
-        card_id=about.id, user=current_user, about=about.about
+    """Позволяет владельцу карты поделиться ей, выдав права 'editor' или 'viewer' по логину."""
+    return CardRepository.share_card_access(
+        card_id=card_id,
+        target_login=share_data.target_login,
+        access_level=share_data.access_level,
+        current_user=current_user
     )
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
 
 
-@cards_app.patch("/update/code", summary="Обновление кода карты")
-async def update_card_code_api(
-    response: Response,
-    code: UpdateCardCode,
-    current_user: User = Depends(get_current_user),
+@cards_app.put("/{card_id}/owner", summary="Передача прав главного владельца карты")
+async def change_owner(
+    card_id: str, 
+    owner_data: ChangeOwnerSchema, 
+    current_user: UserSchema = Depends(get_current_user)
 ):
-    result = update_card_code_query(
-        card_id=code.id, user=current_user, code=code.code, code_type=code.code_type
+    """Только текущий 'owner' карты может полностью передать права владения другому пользователю."""
+    return CardRepository.change_card_owner(
+        card_id=card_id,
+        target_login=owner_data.target_login,
+        current_user=current_user
     )
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
 
 
-@cards_app.patch("/update/own", summary="Обновление владельца карты")
-async def update_card_code_api(
-    response: Response,
-    own: UpdateCardOwn,
-    current_user: User = Depends(get_current_user),
+@cards_app.put("/{card_id}/image", summary="Загрузка или обновление изображения лицевой/оборотной стороны карты")
+async def upload_card_image(
+    card_id: str, 
+    file: UploadFile = File(...), 
+    current_user: UserSchema = Depends(get_current_user)
 ):
-    result = update_card_own_query(card_id=own.id, user=current_user, own=own.own)
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
+    """
+    Принимает файл изображения, физически сохраняет его на сервере в папку /app/data/media/
+    и записывает относительный путь в базу данных вместо тяжелого BLOB-объекта.
+    """
+    MEDIA_DIR.mkdir(parents=True, exist_ok=True)
+    
+    file_extension = Path(file.filename).suffix
+    if file_extension.lower() not in [".jpg", ".jpeg", ".png", ".webp"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Разрешены только файлы изображений формата: JPG, PNG, WEBP."
+        )
+
+    local_file_name = f"{card_id}{file_extension}"
+    full_save_path = MEDIA_DIR / local_file_name
+    relative_db_path = f"media/{local_file_name}"
+
+    try:
+        with open(full_save_path, "wb") as buffer:
+            buffer.write(await file.read())
+            
+        return CardRepository.update_card(
+            card_id=card_id,
+            update_data={"image_path": relative_db_path},
+            current_user=current_user
+        )
+    except Exception as err:
+        logger.error(f"Ошибка при физическом сохранении файла на сервере: {err}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Не удалось сохранить изображение на сервере."
+        )
 
 
-@cards_app.patch("/update/image", summary="Обновление кода карты")
-async def update_card_image_api(
-    response: Response,
-    id: int,
-    file: UploadFile,
-    current_user: User = Depends(get_current_user),
-):
-    result = update_card_image_query(
-        card_id=id, user=current_user, image=file.file.read()
-    )
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
-
-
-@cards_app.delete("/delete", summary="Удаление карты")
-async def delete_card_api(
-    response: Response, card: Card, current_user: User = Depends(get_current_user)
-):
-    result = delete_card_query(card_id=card.id, user=current_user)
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
+@cards_app.delete("/{card_id}", summary="Полное удаление дисконтной карты из системы")
+async def delete_card(card_id: str, current_user: UserSchema = Depends(get_current_user)):
+    """Полностью удаляет саму карту и каскадно очищает таблицу прав доступа к ней."""
+    return CardRepository.delete_card(card_id=card_id, current_user=current_user)

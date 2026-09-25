@@ -1,125 +1,95 @@
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel
 
-from api.api_auth import User, get_current_user
-from db_modules.db_query_users import (
-    get_users_query,
-    registration_user_query,
-    update_password_user_query,
-    update_role_user_query,
-    delete_user_query,
-)
+# Импортируем нашу зависимость авторизации, схему юзера и репозиторий управления пользователями
+from api.api_auth import get_current_user, UserSchema
+from db.db_users import UserRepository
 
 users_app = APIRouter(prefix="/users", tags=["Пользователи"])
 
 
-class LoginUpdate(BaseModel):
-    login: str
-
-
-class RegistrationUser(BaseModel):
+class RegistrationUserSchema(BaseModel):
     login: str
     user_name: str
     password: str
 
 
-class UpdatePassword(LoginUpdate):
+class UpdatePasswordSchema(BaseModel):
+    login: str
     password: str
 
 
-class UpdateRole(LoginUpdate):
+class UpdateRoleSchema(BaseModel):
+    login: str
     is_admin: bool = False
 
 
-@users_app.get("/get", summary="Получение списка пользователей")
-async def get_users_api(
-    response: Response, current_user: User = Depends(get_current_user)
-):
-    if current_user!=None and current_user.is_admin == True:
-        result = get_users_query()
-    else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
+
+@users_app.get("/", summary="Получение списка всех пользователей (Только для Администратора)")
+async def get_users_api(current_user: UserSchema = Depends(get_current_user)):
+    """Возвращает массив всех учетных записей. Доступно только администраторам системы."""
+    return UserRepository.get_all_users(current_user=current_user)
 
 
-@users_app.post("/registration", summary="Создание пользователя")
+@users_app.post("/registration", status_code=status.HTTP_201_CREATED, summary="Создание/Регистрация нового пользователя")
 async def registration_user_api(
-    response: Response,
-    registration_user: RegistrationUser,
-    current_user: User = Depends(get_current_user),
+    registration_data: RegistrationUserSchema,
+    current_user: UserSchema = Depends(get_current_user)
 ):
-    if current_user.is_admin == True:
-        result = registration_user_query(
-            login=registration_user.login,
-            user_name=registration_user.user_name,
-            password=registration_user.password,
-        )
-    else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
-
-
-@users_app.patch("/change/password", summary="Смена пароля пользователя")
-async def update_password_user_api(
-    response: Response,
-    password: UpdatePassword,
-    current_user: User = Depends(get_current_user),
-):
-    result = update_password_user_query(
-        user_update=current_user, login=password.login, password=password.password
+    """
+    Создает новую учетную запись в базе данных. 
+    Доступно только администраторам системы.
+    """
+    return UserRepository.register_user(
+        login=registration_data.login,
+        user_name=registration_data.user_name,
+        password=registration_data.password,
+        current_user=current_user
     )
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
 
 
-@users_app.patch("/change/role", summary="Смена роли пользователя")
+@users_app.patch("/password", summary="Смена пароля пользователя")
+async def update_password_user_api(
+    password_data: UpdatePasswordSchema,
+    current_user: UserSchema = Depends(get_current_user)
+):
+    """
+    Позволяет сменить пароль. 
+    Пользователь может менять свой пароль, администратор — любой аккаунт.
+    """
+    return UserRepository.update_password(
+        target_login=password_data.login,
+        password=password_data.password,
+        current_user=current_user
+    )
+
+
+@users_app.patch("/role", summary="Смена администраторской роли пользователя")
 async def update_role_user_api(
-    response: Response, role: UpdateRole, current_user: User = Depends(get_current_user)
+    role_data: UpdateRoleSchema,
+    current_user: UserSchema = Depends(get_current_user)
 ):
-    if current_user.is_admin == True:
-        result = update_role_user_query(
-            user_update=current_user, login=role.login, is_admin=role.is_admin
-        )
-    else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
+    """
+    Повышает или понижает уровень прав пользователя. 
+    Доступно только администраторам системы с защитой от удаления последнего админа.
+    """
+    return UserRepository.update_role(
+        target_login=role_data.login,
+        is_admin=role_data.is_admin,
+        current_user=current_user
+    )
 
 
-@users_app.delete("/delet", summary="Удаление пользователя")
-async def delet_user_api(
-    response: Response, login: str, current_user: User = Depends(get_current_user)
+@users_app.delete("/{login}", summary="Полное удаление пользователя из системы")
+async def delete_user_api(
+    login: str,
+    current_user: UserSchema = Depends(get_current_user)
 ):
-    if current_user.is_admin == True:
-        result = delete_user_query(user_delet=current_user, login=login)
-    else:
-        result = {
-            "result": False,
-            "message": "Доступно только администратору",
-            "category": "warning",
-            "cod": 403,
-        }
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
+    """
+    Каскадно удаляет пользователя и все связанные с ним доступы к картам.
+    Доступно только администраторам системы с защитой от удаления последнего админа.
+    """
+    return UserRepository.delete_user(
+        target_login=login,
+        current_user=current_user
+    )

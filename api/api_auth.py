@@ -1,61 +1,76 @@
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional
+from sqlalchemy import select
 
-from db_modules.db_query_auth import (
-    auth_query,
-    logout_query,
-    decode_token,
-    get_current_user_query,
-)
+from db.db_create import session_create, Users
+from db.db_auth import auth_user_query, decode_token
 
 auth_app = APIRouter(
     prefix="/auth",
     tags=["Авторизация"],
 )
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-
-class User(BaseModel):
+class UserSchema(BaseModel):
+    id: str
     login: str
-    name: Optional[str] = None
+    user_name: Optional[str] = None
     is_admin: bool
 
+    class Config:
+        from_attributes = True
 
-class Auth(User):
-    password: str
-    disabled: bool = False
-
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserSchema:
+    """
+    Проверяет JWT токен, извлекает пользователя и возвращает схему данных.
+    Если токен невалидный или пользователь заблокирован — генерирует 401 ошибку.
+    """
     login = decode_token(token=token)
-    if login == None:
-        user=(None,None,None)
-    else:
-        user = get_current_user_query(login=login)
-        return User(login=user[0], name=user[1], is_admin=bool(int(user[2])))
-
+    if login is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверный или истекший токен доступа.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
+    with session_create() as session:
+        user = session.scalars(select(Users).where(Users.login == login)).one_or_none()
+        
+        if user is None or user.disabled:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Пользователь заблокирован или не существует.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+            
+        return UserSchema.from_orm(user)
+    
 
 @auth_app.post(
     "/login",
-    summary="\u0410\u0432\u0442\u043e\u0440\u0438\u0437\u0430\u0446\u0438\u044f \u0434\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0442\u043e\u043a\u0435\u043d\u0430",
+    summary="Авторизация для получения токена (OAuth2)",
 )
-async def login_api(response: Response, auth: OAuth2PasswordRequestForm = Depends()):
-    result = auth_query(login=auth.username, password=auth.password)
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
+async def login_api(auth: OAuth2PasswordRequestForm = Depends()):
+    """
+    Принимает username и password через стандартную форму.
+    Возвращает access_token формата Bearer.
+    """
+    return auth_user_query(login=auth.username, password=auth.password)
 
 
 @auth_app.post(
     "/logout",
-    summary="\u0412\u044b\u0445\u043e\u0434 \u0438\u0437 \u0443\u0447\u0435\u0442\u043d\u043e\u0439 \u0437\u0430\u043f\u0438\u0441\u0438",
+    summary="Выход из учетной записи",
 )
-async def logout_api(
-    response: Response, current_user: User = Depends(get_current_user)
-):
-    result = logout_query(login=current_user.login)
-    response.status_code = result["cod"]
-    del result["cod"]
-    return result
+async def logout_api(current_user: UserSchema = Depends(get_current_user)):
+    """
+    Для Stateless JWT серверу не нужно чистить базу данных.
+    Эндпоинт сообщает клиенту, что сессия завершена, и тот должен стереть токен у себя.
+    """
+    return {
+        "result": True,
+        "message": f"Пользователь {current_user.login} успешно деавторизован на сервере. Удалите токен на клиенте."
+    }

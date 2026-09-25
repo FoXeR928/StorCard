@@ -1,7 +1,7 @@
 [project]
 name = "storcard"
-version = "0.6.0"
-description = "Add your description here"
+version = "0.7.0"
+description = "Селф-хостед сервер для хранения и каталогизации дисконтных карт"
 authors = [
     {name = "foxer928",email = "nik280302@yandex.ru"}
 ]
@@ -17,5 +17,15 @@ dependencies = [
     "python-multipart>=0.0.20",
     "sqlalchemy>=2.0.43",
     "uvicorn>=0.35.0",
-    "cryptography>=46.0.4"
 ]
+
+[dependency-groups]
+dev = [
+    "black>=24.0.0",     # Автоформатирование кода
+    "flake8>=7.0.0",    # Проверка стандартов кода
+    "pytest>=8.0.0",    # Запуск тестов (если появятся в будущем)
+]
+
+[tool.uv]
+managed = true
+package = false
