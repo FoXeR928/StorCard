@@ -1,6 +1,6 @@
 [project]
 name = "storcard"
-version = "0.7.0"
+version = "0.7.1"
 description = "Селф-хостед сервер для хранения и каталогизации дисконтных карт"
 authors = [
     {name = "foxer928",email = "nik280302@yandex.ru"}

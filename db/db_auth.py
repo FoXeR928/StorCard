@@ -1,5 +1,7 @@
 import os
+import secrets
 import jwt
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from loguru import logger
 from fastapi import HTTPException, status
@@ -7,7 +9,17 @@ from sqlalchemy import select
 
 from db.db_create import session_create, Users
 
-SECRET_KEY = os.getenv("APP_SECRET_KEY")
+SECRET_KEY_PATH=Path("./data/secret.key")
+
+if os.path.exists(SECRET_KEY_PATH):
+    with open(SECRET_KEY_PATH,'r') as f:
+        SECRET_KEY=f.read().strip()
+else:
+    SECRET_KEY=secrets.token_urlsafe(64)
+    with open(SECRET_KEY_PATH, "w") as f:
+        f.write(SECRET_KEY)
+    logger.info("JWT токен создан")
+
 ALGORITHM = "HS256"
 
 def create_token(data: dict, expires_use: bool = False) -> str:

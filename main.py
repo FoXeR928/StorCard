@@ -1,17 +1,23 @@
 import os
 import tomllib
+import uvicorn
+from pathlib import Path
 from contextlib import asynccontextmanager
 from loguru import logger
-import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from core.logger_config import init_log
+
+os.makedirs(Path("./data/logs"), exist_ok=True)  #создать через докер
+
+IS_DEBUG = os.getenv("DEBUG", "false").lower() in ("true", "1", "yes")
+init_log(is_debug=IS_DEBUG)
+
+from db.db_create import Base, engine
 
 from api.api_auth import auth_app
 from api.api_users import users_app
 from api.api_cards import cards_app
-
-from db.db_create import Base, engine
-from core.logger_config import init_log
 
 
 def load_project_metadata():
@@ -25,13 +31,8 @@ def load_project_metadata():
         logger.error(f"Ошибка чтения метаданных pyproject.toml: {err}")
         return "storcard", '0'
 
-
-IS_DEBUG = os.getenv("DEBUG", "false").lower() in ("true", "1", "yes")
 APP_NAME, APP_VERSION = load_project_metadata()
 APP_PORT=int(os.getenv("APP_PORT", 8000))
-
-init_log(is_debug=IS_DEBUG)
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

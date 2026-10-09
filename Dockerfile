@@ -23,6 +23,8 @@ COPY db/ ./db/
 COPY utils/ ./utils/
 COPY main.py .
 
+RUN mkdir -p ./data/logs
+
 EXPOSE 8080
 
 CMD ["uv", "run", "main.py"]
