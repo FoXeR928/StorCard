@@ -1,6 +1,38 @@
-.venv
-.uv
-__pycache__/
+# VCS
 .git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Данные (не тащим локальные БД/логи в образ)
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.key
+logs/
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Прочее
+*.md
+!README.md
 .env
-date
+.env.*

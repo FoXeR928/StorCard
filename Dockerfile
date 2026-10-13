@@ -1,30 +1,58 @@
-FROM astral-sh/uv:python3.12-alpine AS builder
+# syntax=docker/dockerfile:1.7
 
-ENV UV_COMPILE_BYTECODE=1
-ENV UV_LINK_MODE=copy
+ARG PYTHON_VERSION=3.12
+
+# ---------- Stage 1: builder ----------
+FROM python:${PYTHON_VERSION}-slim AS builder
+
+COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /usr/local/bin/
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PROJECT_ENVIRONMENT=/opt/venv
 
 WORKDIR /app
 
-COPY pyproject.toml uv.lock* ./
+# Манифесты для кеширования зависимостей
+COPY pyproject.toml uv.lock ./
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-install-project
+# Prod-зависимости, lock обязателен, проект не ставим
+RUN uv sync --no-dev --no-install-project --frozen
 
-FROM python:3.12-alpine
+# ---------- Stage 2: runtime ----------
+FROM python:${PYTHON_VERSION}-slim AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/opt/venv/bin:$PATH" \
+    APP_PORT=8000 \
+    DEBUG=false
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Non-root user с фиксированным uid=1000
+RUN groupadd --system --gid 1000 storcard \
+    && useradd --system --uid 1000 --gid storcard --create-home storcard
 
 WORKDIR /app
 
-COPY --from=builder /app/.venv /app/.venv
+# venv из builder + код приложения
+COPY --from=builder /opt/venv /opt/venv
+COPY --chown=storcard:storcard . .
 
-ENV PATH="/app/.venv/bin:$PATH"
+# Каталог для данных и его права
+RUN mkdir -p /app/data/logs /app/data/media \
+    && chown -R storcard:storcard /app/data
 
-COPY api/ ./api/
-COPY db/ ./db/
-COPY utils/ ./utils/
-COPY main.py .
+USER storcard
 
-RUN mkdir -p ./data/logs
+EXPOSE 8000
 
-EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -fsS "http://127.0.0.1:${APP_PORT}/status" || exit 1
 
-CMD ["uv", "run", "main.py"]
+# Запускаем uvicorn напрямую (без reload, exec-форма, PID 1)
+CMD ["sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${APP_PORT:-8000} --log-level warning"]

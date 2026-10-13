@@ -6,14 +6,17 @@ from contextlib import asynccontextmanager
 from loguru import logger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from core.logger_config import init_log
+from core.config import LOGS_DIR, MEDIA_DIR
 
-os.makedirs(Path("./data/logs"), exist_ok=True)  #создать через докер
+os.makedirs(Path(LOGS_DIR), exist_ok=True)
+os.makedirs(Path(MEDIA_DIR), exist_ok=True)
 
 IS_DEBUG = os.getenv("DEBUG", "false").lower() in ("true", "1", "yes")
 init_log(is_debug=IS_DEBUG)
 
-from db.db_create import Base, engine
+from db.db_create import Base, engine, ensure_default_admin
 
 from api.api_auth import auth_app
 from api.api_users import users_app
@@ -29,23 +32,28 @@ def load_project_metadata():
         return project.get("name", "storcard"), project.get("version")
     except Exception as err:
         logger.error(f"Ошибка чтения метаданных pyproject.toml: {err}")
-        return "storcard", '0'
+        return "storcard", "0"
+
 
 APP_NAME, APP_VERSION = load_project_metadata()
-APP_PORT=int(os.getenv("APP_PORT", 8000))
+APP_PORT = int(os.getenv("APP_PORT", 8000))
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Жизненный цикл приложения: выполняется один раз при старте контейнера"""
-    logger.info(f"Запуск {APP_NAME} v{APP_VERSION}: проверка базы данных SQLite...")
+    logger.info(f"Запуск {APP_NAME} v{APP_VERSION}: проверка базы данных...")
     try:
-        Base.metadata.create_all(bind=engine)
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        await ensure_default_admin()
         logger.success("Инфраструктура базы данных полностью готова к работе.")
     except Exception as e:
         logger.critical(f"Критическая ошибка при инициализации сервера: {e}")
         raise e
     yield
+    await engine.dispose()
     logger.info("Сервер StorCard успешно остановлен.")
+
 
 app = FastAPI(
     title="StorCard API",
@@ -59,14 +67,16 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
 @app.middleware("http")
 async def log_requests(request, call_next):
     import time
+
     start_time = time.time()
     response = await call_next(request)
     process_time = (time.time() - start_time) * 1000
@@ -77,17 +87,18 @@ async def log_requests(request, call_next):
     )
     return response
 
+
 app.include_router(auth_app)
 app.include_router(users_app)
 app.include_router(cards_app)
+app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
+
 
 @app.get("/status", summary="Проверка работоспособности сервера")
 async def get_status_api():
-    return {
-        "status": "OK",
-        "app": APP_NAME,
-        "version": APP_VERSION
-    }
+    return {"status": "OK", "app": APP_NAME, "version": APP_VERSION}
+
+
 if __name__ == "__main__":
     logger.success(
         f"\n=========================================================\n"
@@ -96,9 +107,5 @@ if __name__ == "__main__":
         f"========================================================="
     )
     uvicorn.run(
-        "main:app", 
-        host="0.0.0.0", 
-        port=APP_PORT, 
-        reload=IS_DEBUG,
-        log_level="warning" 
+        "main:app", host="0.0.0.0", port=APP_PORT, reload=IS_DEBUG, log_level="warning"
     )
