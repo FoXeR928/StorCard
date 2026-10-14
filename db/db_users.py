@@ -163,7 +163,9 @@ class UserRepository:
                 )
 
             if not is_admin:
-                await cls._verify_admin_protection(session, target_login, current_user.login)
+                await cls._verify_admin_protection(
+                    session, target_login, current_user.login
+                )
 
             try:
                 user.is_admin = is_admin
@@ -201,7 +203,9 @@ class UserRepository:
                     detail="Пользователь не найден.",
                 )
 
-            await cls._verify_admin_protection(session, target_login, current_user.login)
+            await cls._verify_admin_protection(
+                session, target_login, current_user.login
+            )
 
             try:
                 # 1. Находим «наследника» — самого старого администратора,

@@ -86,7 +86,9 @@ async def update_card_fields(
     Доступно пользователям с уровнем прав 'owner' или 'editor'.
     """
     return await CardRepository.update_card(
-        card_id=card_id, update_data=update_data.model_dump(exclude_unset=True), current_user=current_user
+        card_id=card_id,
+        update_data=update_data.model_dump(exclude_unset=True),
+        current_user=current_user,
     )
 
 
@@ -156,17 +158,19 @@ async def upload_card_image(
         with open(full_save_path, "wb") as buffer:
             buffer.write(await file.read())
 
-        return await CardRepository.update_card(
+        await CardRepository.update_card(
             card_id=card_id,
             update_data={"image_path": relative_db_path},
             current_user=current_user,
         )
+        return {"result": True, "image": relative_db_path}
     except Exception as err:
         logger.error(f"Ошибка при физическом сохранении файла на сервере: {err}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Не удалось сохранить изображение на сервере.",
         )
+
 
 @cards_app.delete("/{card_id}", summary="Полное удаление дисконтной карты из системы")
 async def delete_card(

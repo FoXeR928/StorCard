@@ -44,7 +44,13 @@ class CardRepository:
     ) -> list:
         """Объединенный метод получения карт: возвращает либо личные карты, либо ВСЕ (для админа)."""
         async with session_create() as session:
-            stmt = select(Cards.id, Cards.name, Cards.about, Cards.barcode)
+            stmt = select(
+                Cards.id,
+                Cards.name,
+                Cards.about,
+                Cards.barcode,
+                Cards.image_path,
+            )
 
             if global_view:
                 if not current_user.is_admin:

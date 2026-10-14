@@ -67,9 +67,7 @@ def decode_token(token: str, expected_type: str = "access") -> str | None:
         return None
 
 
-async def auth_user_query(
-    login: str, password: str, long_lived: bool = False
-) -> dict:
+async def auth_user_query(login: str, password: str, long_lived: bool = False) -> dict:
     """Проверка логина/пароля. Возвращает access + refresh токены."""
     async with session_create() as session:
         user = (
