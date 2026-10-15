@@ -20,19 +20,26 @@ else:
 
 ALGORITHM = "HS256"
 
-# Сроки жизни токенов
-ACCESS_TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_MINUTES", "30"))
+SHORT_ACCESS_DAYS = int(os.getenv("SHORT_ACCESS_DAYS", "7"))
+LONG_ACCESS_DAYS = int(os.getenv("LONG_ACCESS_DAYS", "30"))
 REFRESH_TOKEN_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS", "30"))
 
 
-def create_token(data: dict, token_type: str = "access") -> str:
+def create_token(
+    data: dict,
+    token_type: str = "access",
+    remember_me: bool = False,
+) -> str:
     """Генерация access или refresh токена."""
     try:
         now = datetime.now(timezone.utc)
+
         if token_type == "refresh":
             expire = now + timedelta(days=REFRESH_TOKEN_DAYS)
+        elif remember_me:
+            expire = now + timedelta(days=LONG_ACCESS_DAYS)
         else:
-            expire = now + timedelta(minutes=ACCESS_TOKEN_MINUTES)
+            expire = now + timedelta(days=SHORT_ACCESS_DAYS)
 
         to_encode = data.copy()
         to_encode.update({"exp": expire, "type": token_type})
@@ -67,8 +74,15 @@ def decode_token(token: str, expected_type: str = "access") -> str | None:
         return None
 
 
-async def auth_user_query(login: str, password: str, long_lived: bool = False) -> dict:
-    """Проверка логина/пароля. Возвращает access + refresh токены."""
+async def auth_user_query(
+    login: str,
+    password: str,
+    remember_me: bool = False,
+) -> dict:
+    """
+    remember_me=False: только 7-дневный access без refresh.
+    remember_me=True:  30-дневный access + 30-дневный refresh.
+    """
     async with session_create() as session:
         user = (
             await session.scalars(select(Users).where(Users.login == login))
@@ -90,13 +104,14 @@ async def auth_user_query(login: str, password: str, long_lived: bool = False) -
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        access_token = create_token({"sub": user.login}, token_type="access")
-        refresh_token = create_token({"sub": user.login}, token_type="refresh")
-        logger.info(f"Пользователь {user.login} авторизован.")
+        access_token = create_token(
+            {"sub": user.login},
+            token_type="access",
+            remember_me=remember_me,
+        )
 
-        return {
+        response: dict = {
             "access_token": access_token,
-            "refresh_token": refresh_token,
             "token_type": "bearer",
             "user": {
                 "login": user.login,
@@ -105,9 +120,22 @@ async def auth_user_query(login: str, password: str, long_lived: bool = False) -
             },
         }
 
+        if remember_me:
+            refresh_token = create_token(
+                {"sub": user.login},
+                token_type="refresh",
+            )
+            response["refresh_token"] = refresh_token
+
+        logger.info(
+            f"Пользователь {user.login} авторизован "
+            f"(remember_me={remember_me})."
+        )
+        return response
+
 
 async def refresh_access_token(refresh_token: str) -> dict:
-    """Обмен refresh-токена на новый access-токен."""
+    """Обмен refresh-токена на новый access + новый refresh (ротация)."""
     login = decode_token(refresh_token, expected_type="refresh")
     if login is None:
         raise HTTPException(
@@ -125,6 +153,16 @@ async def refresh_access_token(refresh_token: str) -> dict:
                 detail="Пользователь заблокирован или не существует.",
             )
 
-    new_access = create_token({"sub": login}, token_type="access")
-    logger.info(f"Обновлён access-токен для {login}.")
-    return {"access_token": new_access, "token_type": "bearer"}
+    new_access = create_token(
+        {"sub": login},
+        token_type="access",
+        remember_me=True,
+    )
+    new_refresh = create_token({"sub": login}, token_type="refresh")
+
+    logger.info(f"Обновлены access + refresh для {login}.")
+    return {
+        "access_token": new_access,
+        "refresh_token": new_refresh,
+        "token_type": "bearer",
+    }
