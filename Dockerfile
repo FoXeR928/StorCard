@@ -54,5 +54,10 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -fsS "http://127.0.0.1:${APP_PORT}/status" || exit 1
 
-# Запускаем uvicorn напрямую (без reload, exec-форма, PID 1)
-CMD ["sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${APP_PORT:-8000} --log-level warning"]
+# DEBUG=true → --reload; иначе прод-режим. exec для корректного PID 1.
+CMD ["sh", "-c", "\
+  if [ \"$DEBUG\" = \"true\" ] || [ \"$DEBUG\" = \"1\" ]; then \
+    exec uvicorn main:app --host 0.0.0.0 --port ${APP_PORT:-8000} --reload --log-level info; \
+  else \
+    exec uvicorn main:app --host 0.0.0.0 --port ${APP_PORT:-8000} --log-level warning; \
+  fi"]

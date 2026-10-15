@@ -7,7 +7,7 @@ async def test_login_success(client):
     body = resp.json()
     assert body["token_type"] == "bearer"
     assert "access_token" in body
-    assert "refresh_token" in body          # ← ДОБАВЬ
+    assert "refresh_token" in body  # ← ДОБАВЬ
     assert body["user"]["login"] == "admin"
     assert body["user"]["is_admin"] is True
 
@@ -42,6 +42,7 @@ async def test_refresh_with_access_token_rejected(client):
 
     resp = await client.post("/auth/refresh", json={"refresh_token": access})
     assert resp.status_code == 401
+
 
 async def test_login_wrong_password(client):
     resp = await client.post(
@@ -82,4 +83,3 @@ async def test_status_endpoint(client):
     resp = await client.get("/status")
     assert resp.status_code == 200
     assert resp.json()["status"] == "OK"
-

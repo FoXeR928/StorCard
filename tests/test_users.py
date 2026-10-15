@@ -126,6 +126,7 @@ async def test_delete_nonexistent_user(client, admin_headers):
     resp = await client.delete("/users/ghost", headers=admin_headers)
     assert resp.status_code == 404
 
+
 async def test_delete_user_transfers_cards_to_other_admin(
     client, admin_headers, user_headers, regular_user
 ):
@@ -157,7 +158,9 @@ async def test_delete_user_transfers_cards_to_other_admin(
     detail = await client.get(f"/cards/{card_id}", headers=admin_headers)
     assert detail.status_code == 200
     # Админ видит всё как admin, поэтому проверяем через «наследника»
-    r2 = await client.post("/auth/login", data={"username": "admin2", "password": "pass2"})
+    r2 = await client.post(
+        "/auth/login", data={"username": "admin2", "password": "pass2"}
+    )
     h2 = {"Authorization": f"Bearer {r2.json()['access_token']}"}
     detail2 = await client.get(f"/cards/{card_id}", headers=h2)
     assert detail2.status_code == 200
