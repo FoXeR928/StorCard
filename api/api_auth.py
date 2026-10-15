@@ -43,7 +43,7 @@ async def login_api(
     return await auth_user_query(
         login=auth.username,
         password=auth.password,
-        long_lived=remember_me,
+        remember_me=remember_me,
     )
 
 
