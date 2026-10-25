@@ -1,7 +1,8 @@
 import os
 from loguru import logger
 from fastapi import HTTPException, status
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete, update, and_
+from sqlalchemy.orm import aliased
 from typing import Optional
 
 from db.db_create import session_create, Cards, CardsAccess, Users
@@ -44,12 +45,29 @@ class CardRepository:
     ) -> list:
         """Объединенный метод получения карт: возвращает либо личные карты, либо ВСЕ (для админа)."""
         async with session_create() as session:
-            stmt = select(
-                Cards.id,
-                Cards.name,
-                Cards.about,
-                Cards.barcode,
-                Cards.image_path,
+            # Создаем алиасы, так как таблица доступов используется дважды
+            # (один раз для поиска владельца, второй раз для фильтрации по текущему юзеру)
+            owner_access = aliased(CardsAccess)
+            owner_user = aliased(Users)
+
+            stmt = (
+                select(
+                    Cards.id,
+                    Cards.name,
+                    Cards.about,
+                    Cards.barcode,
+                    Cards.image_path,
+                    owner_user.login.label("owner_login"),  # <-- ВОТ ЭТО ПОЛЕ
+                )
+                .select_from(Cards)
+                .join(
+                    owner_access,
+                    and_(
+                        owner_access.card_id == Cards.id,
+                        owner_access.access_level == "owner",
+                    ),
+                )
+                .join(owner_user, owner_user.id == owner_access.user_id)
             )
 
             if global_view:
@@ -62,8 +80,13 @@ class CardRepository:
                     f"Администратор {current_user.login} запросил глобальный список карт."
                 )
             else:
-                stmt = stmt.join(CardsAccess, CardsAccess.card_id == Cards.id).where(
-                    CardsAccess.user_id == current_user.id
+                user_access = aliased(CardsAccess)
+                stmt = stmt.join(
+                    user_access,
+                    and_(
+                        user_access.card_id == Cards.id,
+                        user_access.user_id == current_user.id,
+                    ),
                 )
                 logger.debug(
                     f"Пользователь {current_user.login} запросил список своих карт."
