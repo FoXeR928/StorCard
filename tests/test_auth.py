@@ -7,7 +7,7 @@ async def test_login_success(client):
     body = resp.json()
     assert body["token_type"] == "bearer"
     assert "access_token" in body
-    assert "refresh_token" in body  # ← ДОБАВЬ
+    assert "refresh_token" not in body
     assert body["user"]["login"] == "admin"
     assert body["user"]["is_admin"] is True
 
@@ -15,9 +15,10 @@ async def test_login_success(client):
 async def test_refresh_token_returns_new_access(client):
     """POST /auth/refresh обменивает refresh на новый access."""
     login = await client.post(
-        "/auth/login",
+        "/auth/login?remember_me=true",        # ← вот это
         data={"username": "admin", "password": "adminpass"},
     )
+    assert "refresh_token" in login.json()
     refresh = login.json()["refresh_token"]
 
     resp = await client.post("/auth/refresh", json={"refresh_token": refresh})
