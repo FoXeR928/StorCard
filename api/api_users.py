@@ -23,6 +23,9 @@ class UpdateRoleSchema(BaseModel):
     login: str
     is_admin: bool = False
 
+class ResetPasswordSchema(BaseModel):
+    login: str
+
 
 @users_app.get(
     "/", summary="Получение списка всех пользователей (Только для Администратора)"
@@ -56,6 +59,20 @@ async def registration_user_api(
         current_user=current_user,
     )
 
+@users_app.post("/reset-password", summary="Сгенерировать случайный пароль")
+async def reset_password_random_api(
+    data: ResetPasswordSchema,
+    current_user: UserSchema = Depends(get_current_user),
+):
+    """
+    Генерирует надежный пароль (32 символа) и возвращает его.
+    Админ может сбросить пароль любому, обычный юзер — только себе.
+    """
+    new_password = await UserRepository.reset_password_to_random(
+        target_login=data.login,
+        current_user=current_user,
+    )
+    return {"result": True, "password": new_password}
 
 @users_app.patch("/password", summary="Смена пароля пользователя")
 async def update_password_user_api(

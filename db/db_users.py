@@ -1,3 +1,4 @@
+import secrets
 from loguru import logger
 from fastapi import HTTPException, status
 from sqlalchemy import select, update, delete, func
@@ -35,6 +36,7 @@ class UserRepository:
                     detail="Действие заблокировано: в системе должен оставаться как минимум один администратор.",
                 )
 
+    
     @classmethod
     async def get_all_users(cls, current_user: UserSchema) -> list:
         """Возвращает список всех пользователей системы. Доступно только администраторам."""
@@ -110,6 +112,41 @@ class UserRepository:
                 logger.error(
                     f"Не удалось зарегистрировать пользователя {login}. Ошибка: {err}"
                 )
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Ошибка сервера.",
+                )
+
+    @classmethod
+    async def reset_password_to_random(
+        cls, target_login: str, current_user: UserSchema
+    ) -> str:
+        """Генерирует случайный 32-символьный пароль и сохраняет его."""
+        if not current_user.is_admin and current_user.login != target_login:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недостаточно прав.",
+            )
+
+        async with session_create() as session:
+            user = (
+                await session.scalars(select(Users).where(Users.login == target_login))
+            ).one_or_none()
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Пользователь не найден.",
+                )
+
+            try:
+                # Генерируем 32 символа
+                new_password = secrets.token_urlsafe(24)
+                user.set_password(new_password)
+                await session.commit()
+                logger.success(f"Сброшен пароль для {target_login} (случайная генерация)")
+                return new_password
+            except Exception as err:
+                logger.error(f"Ошибка сброса пароля {target_login}: {err}")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Ошибка сервера.",
