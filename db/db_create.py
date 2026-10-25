@@ -143,7 +143,7 @@ async def ensure_default_admin() -> None:
             return
 
         admin_name = os.getenv("ADMIN_NAME", "Администратор")
-        admin_password = os.getenv("ADMIN_PASSWORD") or secrets.token_urlsafe(9)
+        admin_password = os.getenv("ADMIN_PASSWORD") or secrets.token_urlsafe(24)
 
         admin = Users(
             login=admin_login,
