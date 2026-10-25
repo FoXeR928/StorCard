@@ -64,6 +64,15 @@ class UserRepository:
             return [dict(row._mapping) for row in users_get]
 
     @classmethod
+    async def get_directory(cls, current_user: UserSchema) -> list:
+        """Возвращает список логинов и имен для автодополнения при шеринге."""
+        async with session_create() as session:
+            users = await session.execute(
+                select(Users.login, Users.user_name).where(Users.disabled == False)
+            )
+            return [dict(row._mapping) for row in users.all()]
+
+    @classmethod
     async def register_user(
         cls, login: str, user_name: str, password: str, current_user: UserSchema
     ) -> dict:
@@ -251,3 +260,4 @@ class UserRepository:
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Ошибка сервера.",
                 )
+    

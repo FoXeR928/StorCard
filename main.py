@@ -21,6 +21,7 @@ from db.db_create import Base, engine, ensure_default_admin
 from api.api_auth import auth_app
 from api.api_users import users_app
 from api.api_cards import cards_app
+from api.api_migration import migration_app
 
 
 def load_project_metadata():
@@ -91,6 +92,7 @@ async def log_requests(request, call_next):
 app.include_router(auth_app)
 app.include_router(users_app)
 app.include_router(cards_app)
+app.include_router(migration_app)
 app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 

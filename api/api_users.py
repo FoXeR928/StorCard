@@ -31,6 +31,10 @@ async def get_users_api(current_user: UserSchema = Depends(get_current_user)):
     """Возвращает массив всех учетных записей. Доступно только администраторам системы."""
     return await UserRepository.get_all_users(current_user=current_user)
 
+@users_app.get("/directory", summary="Справочник пользователей для шеринга")
+async def get_directory_api(current_user: UserSchema = Depends(get_current_user)):
+    """Доступно всем авторизованным пользователям для автодополнения."""
+    return await UserRepository.get_directory(current_user=current_user)
 
 @users_app.post(
     "/registration",

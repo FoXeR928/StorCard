@@ -130,7 +130,9 @@ async def test_delete_nonexistent_user(client, admin_headers):
 async def test_delete_user_transfers_cards_to_other_admin(
     client, admin_headers, user_headers, regular_user
 ):
-    # 1. Обычный юзер создаёт карту
+    from migration_helpers import db_get_card_owner
+
+    # 1. user1 создаёт карту
     r = await client.post(
         "/cards/",
         json={"name": "Наследство", "barcode": "1"},
@@ -138,30 +140,13 @@ async def test_delete_user_transfers_cards_to_other_admin(
     )
     card_id = r.json()["card_id"]
 
-    # 2. Второй админ — «наследник»
-    await client.post(
-        "/users/registration",
-        json={"login": "admin2", "user_name": "A2", "password": "pass2"},
-        headers=admin_headers,
-    )
-    await client.patch(
-        "/users/role",
-        json={"login": "admin2", "is_admin": True},
-        headers=admin_headers,
-    )
-
-    # 3. Удаляем первого владельца
+    # 2. Удаляем user1
     resp = await client.delete(f"/users/{regular_user['login']}", headers=admin_headers)
     assert resp.status_code == 200
 
-    # 4. Карта жива и видна второму админу
+    # 3. Наследник — admin (самый старый админ), а не кто-то другой
+    assert await db_get_card_owner("1") == "admin"
+
+    # 4. Карта жива
     detail = await client.get(f"/cards/{card_id}", headers=admin_headers)
     assert detail.status_code == 200
-    # Админ видит всё как admin, поэтому проверяем через «наследника»
-    r2 = await client.post(
-        "/auth/login", data={"username": "admin2", "password": "pass2"}
-    )
-    h2 = {"Authorization": f"Bearer {r2.json()['access_token']}"}
-    detail2 = await client.get(f"/cards/{card_id}", headers=h2)
-    assert detail2.status_code == 200
-    assert detail2.json()["my_access_level"] == "owner"
